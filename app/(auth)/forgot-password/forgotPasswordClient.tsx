@@ -123,7 +123,7 @@ const ForgotPasswordClient = () => {
                 <Button
                   type="submit"
                   isLoading={isInitiatingReset}
-                  className="w-full lg:bg-white bg-primary lg:hover:bg-[#9ae45f]/80 hover:text-primary/80 text-center h-[50px] mt-[15px] font-inter font-bold rounded-[4px] lg:text-[#0284B2] text-white hover:text-white"
+                  className="w-full lg:bg-white bg-primary lg:hover:bg-gray-200 lg:hover:text-primary/80 text-center h-[50px] mt-[15px] font-inter font-bold rounded-[4px] lg:text-[#0284B2] text-white hover:text-white"
                 >
                   Send Reset Code
                 </Button>
@@ -131,7 +131,7 @@ const ForgotPasswordClient = () => {
                 <div className="my-[16px] text-center">
                   <Link
                     href="/login"
-                    className="lg:text-white text-primary cursor-pointer lg:hover:text-[#9ae45f]/80 hover:text-primary/80 font-medium text-[14px] text-right"
+                    className="lg:text-white text-primary cursor-pointer lg:hover:text-gray-200 hover:text-primary/80 font-medium text-[14px] text-right"
                   >
                     Back to Login
                   </Link>

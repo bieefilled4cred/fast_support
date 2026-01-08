@@ -101,7 +101,7 @@ export default function AppSidebar() {
         ) : (
           uniqueGroups.map((group) => (
             <SidebarGroup key={group} className="py-[20px] px-0">
-              <SidebarGroupLabel className=" uppercase text-[#04B2F1] font-semibold">
+              <SidebarGroupLabel className=" uppercase text-[#A9A9A9] font-semibold">
                 {group}
               </SidebarGroupLabel>
               <SidebarGroupContent>
@@ -143,7 +143,7 @@ export default function AppSidebar() {
         )}
 
         <SidebarGroup className="py-[30px] px-0 border-t border-[#EAEAEA]">
-          <SidebarGroupLabel className=" uppercase text-[#04B2F1] font-semibold">
+          <SidebarGroupLabel className=" uppercase text-[#A9A9A9] font-semibold">
             Account
           </SidebarGroupLabel>
           <SidebarGroupContent>

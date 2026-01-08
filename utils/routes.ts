@@ -1,13 +1,13 @@
 import {
   Activity,
   ArrowRightLeft,
-  BarChart3,
+  BarChart2,
   FileSearch,
   FileText,
   FlaskConical,
   LayoutDashboard,
   Mail,
-  PieChart,
+  CirclePile,
   RefreshCw,
   ScrollText,
   Search,
@@ -28,7 +28,7 @@ export interface SidebarLink {
 export const sidebarLinks: SidebarLink[] = [
   // General
   {
-    title: "Home",
+    title: "Overview",
     url: "/dashboard",
     icon: LayoutDashboard,
     group: "General",
@@ -43,14 +43,14 @@ export const sidebarLinks: SidebarLink[] = [
   {
     title: "Referral Analytics",
     url: "/referral-analytics",
-    icon: PieChart,
+    icon: CirclePile,
     group: "General",
     roles: ["Super Admin"],
   },
   {
     title: "Deposit Analytics",
     url: "/deposit-analytics",
-    icon: BarChart3,
+    icon: BarChart2,
     group: "General",
     roles: ["Super Admin"],
   },

@@ -19,17 +19,19 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-//   const cookieStore = await cookies();
-//   const encryptedToken = cookieStore.get("cred-crm-ticket-tok")?.value;
+  //   const cookieStore = await cookies();
+  //   const encryptedToken = cookieStore.get("cred-crm-ticket-tok")?.value;
 
-//   if (!encryptedToken) {
-//     redirect("/login");
-//   }
+  //   if (!encryptedToken) {
+  //     redirect("/login");
+  //   }
 
   return (
     <main lang="en">
       {/* <AutoLogoutWrapper /> */}
-      <div className={`min-h-screen min-h-[100vh] grid grid-cols-1 ${dmSans.variable} antialiased vsc-initialized`}>
+      <div
+        className={`min-h-screen grid grid-cols-1 ${dmSans.variable} antialiased vsc-initialized`}
+      >
         <SidebarProvider
           style={
             {
@@ -41,7 +43,7 @@ export default async function RootLayout({
           <main className="w-full overflow-hidden">
             <div className={`${dmSans.variable} antialiased vsc-initialized`}>
               <div className="relative">
-                <div className="w-full flex pb-[18px] px-[1rem] md:px-[2rem] my-[22px] justify-between items-center shadow_[0_-1px_0px_0px_rgba(230,230,230,1)] border-b border-[#E7E7E7]">
+                <div className="w-full flex pb-[18px] px-4 md:px-8 my-[22px] justify-between items-center shadow_[0_-1px_0px_0px_rgba(230,230,230,1)] border-b border-[#E7E7E7]">
                   <div className="w-full flex items-center">
                     <HeaderDropdown />
                   </div>

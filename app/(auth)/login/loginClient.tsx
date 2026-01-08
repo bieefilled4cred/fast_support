@@ -202,7 +202,7 @@ const LoginClient = () => {
               <div className="my-[16px] text-right">
                 <Link
                   href="/forgot-password"
-                  className="lg:text-gray-200 text-[#A9A9A9] cursor-pointer  text-[14px] text-right hover:text-[#ff5f55]/80"
+                  className="lg:text-gray-200 text-[#A9A9A9] cursor-pointer  text-[14px] text-right hover:text-gray-200/80"
                 >
                   Forgot password?
                 </Link>
@@ -212,7 +212,7 @@ const LoginClient = () => {
                 type="submit"
                 variant="default"
                 isLoading={isPending}
-                className="w-full text-center h-[50px] mt-[15px] font-inter font-bold rounded-[4px] lg:bg-white bg-primary lg:text-[#0284B2] lg:hover:bg-[#9ae45f]/80!  hover:bg-primary/80 hover:text-white cursor-pointer text-white"
+                className="w-full text-center h-[50px] mt-[15px] font-inter font-bold rounded-[4px] lg:bg-white bg-primary  lg:hover:bg-gray-200! lg:hover:shadow  hover:bg-primary/80 hover:text-white cursor-pointer text-white lg:text-[#0284B2] lg:hover:text-primary"
               >
                 Login
               </Button>
