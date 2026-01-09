@@ -1,16 +1,8 @@
-import React from "react";
+"use client";
+import AccountSearchClient from "./page-client";
 
 const AccountSearchPage = () => {
-  return (
-    <div className="mx-8 my-5">
-      <h1 className="text-2xl font-bold mb-4">Account Search</h1>
-      <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-        <p className="text-gray-500">
-          Account search capabilities content goes here.
-        </p>
-      </div>
-    </div>
-  );
+  return <AccountSearchClient />;
 };
 
 export default AccountSearchPage;
