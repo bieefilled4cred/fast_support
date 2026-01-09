@@ -66,7 +66,7 @@ export default function AppSidebar() {
   return (
     <Sidebar variant="sidebar" collapsible="icon">
       <SidebarHeader>
-        <div className="my-[20px] px-[22px]">
+        <div className="my-[20px] px-[22px] ">
           <Link href="/dashboard">
             <Image
               src="/logo-text.svg"

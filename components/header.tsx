@@ -89,14 +89,14 @@ export default function HeaderDropdown() {
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   return (
-    <div className="flex w-full justify-between items-center">
+    <div className="flex w-full justify-between items-center ">
       <div className="flex items-center gap-2">
         <SidebarTrigger className="md:hidden" />
         <h4 className="text-[#464646] font-inter font-semibold capitalize">
           {app_name}
         </h4>
       </div>
-      <div className="flex justify-end items-center gap-[16px]">
+      <div className="flex justify-end items-center gap-[16px] ">
         <DropdownMenu
           open={isNotificationOpen}
           onOpenChange={setIsNotificationOpen}
@@ -113,7 +113,7 @@ export default function HeaderDropdown() {
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="end"
-            className="w-96 p-0 shadow-lg border-0 rounded-lg"
+            className="w-96 p-0 shadow-lg border-0 rounded-lg "
           >
             <div className="flex items-center justify-between p-4 border-b border-gray-200">
               <span className="font-semibold text-gray-900 text-base">

@@ -124,126 +124,132 @@ const TransactionSummaryClient = () => {
     setType("all");
     setStartDate("");
     setEndDate("");
+    setData([]); // Clear data when filters are cleared
+    setHasSearched(false); // Reset search state
   };
 
   return (
     <div className="mx-8 my-5 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900">
-          Transaction Summary
-        </h1>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setShowFilters(!showFilters)}
-          className={showFilters ? "bg-gray-100" : ""}
-        >
-          <Filter className="w-4 h-4 mr-2" />
-          {showFilters ? "Hide Filters" : "Show Filters"}
-        </Button>
-      </div>
+      <h1 className="text-2xl font-bold text-gray-900">Transaction Summary</h1>
 
-      {showFilters && (
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 space-y-4 animate-in slide-in-from-top-2 duration-200">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-            {/* Search Input */}
-            <div className="md:col-span-2 lg:col-span-1 xl:col-span-2">
-              <label className="text-sm font-medium text-gray-700 mb-1 block">
-                Account Name/Number
-              </label>
-              <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="Search Account..."
-                  value={accountName}
-                  onChange={(e) => setAccountName(e.target.value)}
-                  className="pl-9"
-                />
-              </div>
+      <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+        <div className="flex flex-col lg:flex-row gap-4 items-end">
+          {/* Search - Takes priority */}
+          <div className="w-full lg:flex-1 space-y-1">
+            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wide flex items-center gap-1">
+              <Search size={10} /> Search Criteria
+            </label>
+            <div className="relative">
+              <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Account Name..."
+                value={accountName}
+                onChange={(e) => setAccountName(e.target.value)}
+                className="pl-9 h-9 w-full bg-gray-50/50 border-gray-200 focus:bg-white transition-colors"
+              />
             </div>
+          </div>
 
-            {/* Status Filter */}
-            <div>
-              <label className="text-sm font-medium text-gray-700 mb-1 block">
-                Status
+          {/* Filters - Compact Row */}
+          <div className="flex flex-wrap items-end gap-2 w-full lg:w-auto">
+            {/* Status */}
+            <div className="space-y-1 flex-1 min-w-[110px] lg:w-[130px]">
+              <label
+                className="text-[10px] font-bold text-gray-500 uppercase tracking-wide flex items-center gap-1"
+                title="Transaction Status"
+              >
+                <Filter size={10} /> Status
               </label>
               <select
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                className="h-9 w-full px-2 py-1 text-sm rounded-md border border-gray-200 bg-gray-50/50 focus:bg-white shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#0284B2]"
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
               >
-                <option value="all">All Statuses</option>
+                <option value="all">All</option>
                 <option value="pending">Pending</option>
                 <option value="successful">Successful</option>
                 <option value="failed">Failed</option>
                 <option value="reversed">Reversed</option>
-                <option value="unknown">Unknown</option>
               </select>
             </div>
 
-            {/* Type Filter */}
-            <div>
-              <label className="text-sm font-medium text-gray-700 mb-1 block">
-                Transaction Type
+            {/* Type */}
+            <div className="space-y-1 flex-1 min-w-[110px] lg:w-[130px]">
+              <label
+                className="text-[10px] font-bold text-gray-500 uppercase tracking-wide flex items-center gap-1"
+                title="Transaction Type"
+              >
+                <Filter size={10} /> Type
               </label>
               <select
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                className="h-9 w-full px-2 py-1 text-sm rounded-md border border-gray-200 bg-gray-50/50 focus:bg-white shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#0284B2]"
                 value={type}
                 onChange={(e) => setType(e.target.value)}
               >
-                <option value="all">All Types</option>
+                <option value="all">All</option>
                 <option value="interbank">Interbank</option>
                 <option value="intrabank">Intrabank</option>
                 <option value="airtime">Airtime</option>
                 <option value="data">Data</option>
-                <option value="electricity">Electricity</option>
+                <option value="electricity">Electric</option>
                 <option value="cable">Cable</option>
-                <option value="point redemption">Point Redemption</option>
               </select>
             </div>
 
-            {/* Date Range - doing simpler input type=date for speed/standard compliance */}
-            <div>
-              <label className="text-sm font-medium text-gray-700 mb-1 block">
-                Start Date
-              </label>
-              <Input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-              />
+            {/* Dates */}
+            <div className="flex items-center gap-2">
+              <div className="space-y-1 w-[105px]">
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wide flex items-center gap-1">
+                  Start
+                </label>
+                <Input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="h-9 w-full text-xs px-2 bg-gray-50/50 border-gray-200 focus:bg-white"
+                />
+              </div>
+              <div className="space-y-1 w-[105px]">
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wide flex items-center gap-1">
+                  End
+                </label>
+                <Input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="h-9 w-full text-xs px-2 bg-gray-50/50 border-gray-200 focus:bg-white"
+                />
+              </div>
             </div>
 
-            <div className="md:col-span-2 lg:col-span-1 xl:col-span-1">
-              <label className="text-sm font-medium text-gray-700 mb-1 block">
-                End Date
-              </label>
-              <Input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-              />
+            {/* Actions */}
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={handleSearch}
+                size="sm"
+                className="bg-[#0284B2] hover:bg-[#026a8f] text-white h-9 px-4"
+              >
+                <Search className="w-4 h-4" />
+              </Button>
+              {(accountName ||
+                status !== "all" ||
+                type !== "all" ||
+                startDate ||
+                endDate) && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleClearFilters}
+                  className="h-9 w-9 text-gray-400 hover:text-red-500 hover:bg-red-50"
+                  title="Clear Filters"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              )}
             </div>
-          </div>
-
-          <div className="flex justify-between items-center pt-2 border-t border-gray-50 mt-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleClearFilters}
-              className="text-gray-500 hover:text-gray-700"
-            >
-              <X className="w-3 h-3 mr-1" /> Clear Filters
-            </Button>
-            <Button
-              onClick={handleSearch}
-              className="bg-[#0284B2] hover:bg-[#026a8f] text-white"
-            >
-              <Search className="mr-2 h-4 w-4" /> Apply Filters
-            </Button>
           </div>
         </div>
-      )}
+      </div>
 
       {hasSearched && (
         <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 animate-in fade-in slide-in-from-bottom-4 duration-500">

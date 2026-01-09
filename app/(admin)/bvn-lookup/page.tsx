@@ -1,14 +1,10 @@
+"use client";
+
 import React from "react";
+import BvnLookupClient from "./page-client";
 
 const BvnLookupPage = () => {
-  return (
-    <div className="mx-8 my-5">
-      <h1 className="text-2xl font-bold mb-4">BVN Lookup</h1>
-      <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-        <p className="text-gray-500">BVN lookup tools content</p>
-      </div>
-    </div>
-  );
+  return <BvnLookupClient />;
 };
 
 export default BvnLookupPage;
