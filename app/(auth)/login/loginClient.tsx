@@ -16,28 +16,18 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+
 import { z } from "zod";
+import { useLoginMutation } from "@/app/query-options/authenticationQueryOption";
+import { useUserStore } from "@/app/store/userStore";
+import { APIError, LoginResponse } from "@/app/types";
 
 const LoginClient = () => {
   const [passwordType, setPasswordType] = useState("password");
-  const router = useRouter();
   const form = LoginValidation();
-
-  const { mutate, isPending } = useMutateData(
-    "login",
-    () => {
-      toast.success("Login successful! Welcome back.");
-      router.push("/dashboard");
-    },
-    (error) => {
-      console.log(error);
-      const errorMessage =
-        error?.response?.message ||
-        error?.message ||
-        "Something went wrong. Please try again.";
-      toast.error(errorMessage);
-    }
-  );
+  const router = useRouter();
+  const { mutate: loginMutation, isPending: isLoading } = useLoginMutation();
+  const setUser = useUserStore((state) => state.setUser);
 
   const togglePasswordVisibility = () => {
     if (passwordType === "password") {
@@ -47,14 +37,55 @@ const LoginClient = () => {
   };
 
   const onSubmit = (values: z.infer<typeof loginSchema>) => {
+    form.clearErrors();
+
     const trimmedValues = {
       username: values.username.replace(/\s/g, "").trim(),
       password: values.password.trim(),
     };
 
-    mutate({
-      url: "/api/login",
-      payload: trimmedValues,
+    loginMutation(trimmedValues, {
+      onSuccess: (data: LoginResponse) => {
+        setUser({
+          email: trimmedValues.username,
+          password: trimmedValues.password,
+          roles: data.roles,
+          isNewUser: data.isNewUser,
+          message: data.message,
+        });
+
+        if (data.isNewUser || data.status === "Temporary") {
+          toast.success("Login successful! Welcome back.");
+          router.push("/dashboard");
+          return;
+        }
+
+        if (data.apps && data.apps.length > 0) {
+          const firstApp = data.apps[0];
+          if (firstApp.url) {
+            window.location.href = firstApp.url;
+            return;
+          }
+        }
+
+        router.push("/dashboard");
+      },
+      onError: (error: APIError) => {
+        const errorMessage =
+          error.response?.message ||
+          error.message ||
+          "Something went wrong. Please try again.";
+
+        form.setError("root", {
+          type: "manual",
+          message: errorMessage,
+        });
+        form.setError("password", {
+          type: "manual",
+          message: errorMessage,
+        });
+        toast.error(errorMessage);
+      },
     });
   };
 
@@ -211,7 +242,7 @@ const LoginClient = () => {
               <Button
                 type="submit"
                 variant="default"
-                isLoading={isPending}
+                isLoading={isLoading}
                 className="w-full text-center h-[50px] mt-[15px] font-inter font-bold rounded-[4px] lg:bg-white bg-primary  lg:hover:bg-gray-200! lg:hover:shadow  hover:bg-primary/80 hover:text-white cursor-pointer text-white lg:text-[#0284B2] lg:hover:text-primary"
               >
                 Login
