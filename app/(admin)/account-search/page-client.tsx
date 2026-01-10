@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
@@ -64,7 +64,9 @@ const AccountSearchClient = () => {
 
   return (
     <div className="mx-8 my-5 space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Account Search</h1>
+      <p className="text-gray-500">
+        View and managed customer profile details.
+      </p>
 
       <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 flex flex-col md:flex-row gap-4 items-end">
         <div className="w-full md:w-1/2">

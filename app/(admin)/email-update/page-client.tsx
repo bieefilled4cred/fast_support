@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Search, Loader2 } from "lucide-react";
 import { UserDetailCard } from "./components/UserDetailCard";
 import { EmailUpdateProfile, EmailUpdateSearchResponse } from "./types";
-import { toast } from "sonner"; // Assuming sonner is used, or alert if not
+// import { toast } from "sonner";
 
 // Mock Data
 const MOCK_RESPONSE: EmailUpdateSearchResponse = {
@@ -107,7 +107,7 @@ const EmailUpdateClient = () => {
 
   return (
     <div className="mx-8 my-5 space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Email Update</h1>
+      <p className="text-gray-500">View and managed email details.</p>
 
       <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 max-w-2xl mx-auto">
         <div className="text-center mb-6">

@@ -1,5 +1,5 @@
 import { CheckTransactionResponse } from "../types";
-import { CheckCircle2, XCircle, Info } from "lucide-react";
+import { CheckCircle2, XCircle } from "lucide-react";
 
 export function TransactionStatusCard({
   data,

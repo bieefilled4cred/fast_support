@@ -261,7 +261,9 @@ const DepositAnalyticsClient = () => {
   return (
     <div className="mx-8 my-5 space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900">Deposit Analytics</h1>
+        <h1 className="text-2xl font-bold text-gray-900">
+          {/* Deposit Analytics */}
+        </h1>
         <Button
           onClick={handleDownload}
           className="bg-[#198754] hover:bg-[#157347] text-white flex items-center gap-2"

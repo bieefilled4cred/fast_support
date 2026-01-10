@@ -124,9 +124,7 @@ const ViewStatementsClient = () => {
 
   return (
     <div className="mx-8 my-5 space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">
-        View Account Statements
-      </h1>
+      <p className="text-gray-500">View and managed account statements.</p>
 
       <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 space-y-4">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-end">

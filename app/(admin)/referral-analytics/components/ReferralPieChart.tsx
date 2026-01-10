@@ -13,6 +13,7 @@ interface RangeData {
   range: string;
   count: number;
   fill: string;
+  [key: string]: any;
 }
 
 interface ReferralPieChartProps {

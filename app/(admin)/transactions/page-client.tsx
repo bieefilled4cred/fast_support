@@ -158,7 +158,7 @@ const TransactionsClient = () => {
 
   return (
     <div className="mx-8 my-5 space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Transactions</h1>
+      <p className="text-gray-500">View and manage customer transactions.</p>
 
       {/* Search Filters */}
       <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 space-y-4">

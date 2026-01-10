@@ -76,7 +76,7 @@ const ProfileSearchClient = () => {
 
   return (
     <div className="mx-8 my-5 space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Profile Search</h1>
+      <p className="text-gray-500">View and managed profile search details.</p>
 
       <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 flex flex-col md:flex-row gap-4 items-end">
         <div className="w-full md:w-2/3">

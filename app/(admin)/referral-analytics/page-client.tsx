@@ -88,6 +88,9 @@ const ReferralAnalyticsClient = () => {
 
   return (
     <div className="mx-8 my-5 space-y-6">
+      <p className="text-gray-500">
+        View and managed referral analytics details.
+      </p>
       <div className="flex items-end gap-4 p-1">
         <div className="w-32">
           <label className="text-sm font-medium text-gray-700 mb-1 block">

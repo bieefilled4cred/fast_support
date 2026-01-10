@@ -130,7 +130,9 @@ const TransactionSummaryClient = () => {
 
   return (
     <div className="mx-8 my-5 space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Transaction Summary</h1>
+      <p className="text-gray-500">
+        View and managed transaction summary details.
+      </p>
 
       <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
         <div className="flex flex-col lg:flex-row gap-4 items-end">

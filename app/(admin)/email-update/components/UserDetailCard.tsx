@@ -1,3 +1,5 @@
+"use client";
+
 import { EmailUpdateProfile } from "../types";
 import { User, Mail, CreditCard, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";

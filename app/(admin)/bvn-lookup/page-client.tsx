@@ -18,7 +18,7 @@ const MOCK_BVN_RESPONSE: BvnLookupResponse = {
     middle_name: "",
     gender: "Male",
     date_of_birth: "1997-01-27",
-    image: "", // Assuming empty base64 string for now
+    image: "",
   },
   isSuccessful: true,
   message: "Operation successful",
@@ -68,7 +68,7 @@ const BvnLookupClient = () => {
 
   return (
     <div className="mx-8 my-5 space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">BVN Lookup</h1>
+      <p className="text-gray-500">View and managed BVN details.</p>
 
       <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 max-w-2xl mx-auto text-center">
         <h2 className="text-lg font-semibold text-gray-800 mb-2">

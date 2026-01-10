@@ -92,7 +92,7 @@ export default function HeaderDropdown() {
     <div className="flex w-full justify-between items-center ">
       <div className="flex items-center gap-2">
         <SidebarTrigger className="md:hidden" />
-        <h4 className="text-[#464646] font-inter font-semibold capitalize">
+        <h4 className="text-[#464646] font-inter font-semibold capitalize text-2xl">
           {app_name}
         </h4>
       </div>
