@@ -1,15 +1,10 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const guestRoutes = [
-  "/login",
-  "/reset-password",
-  "/forgot-password",
-  "/dashboard",
-];
+const guestRoutes = ["/login", "/reset-password", "/forgot-password"];
 
 export function middleware(request: NextRequest) {
-  const token = request.cookies.get("cred-crm-ticket-tok")?.value;
+  const token = request.cookies.get("fast-support-tok")?.value;
   const { pathname } = request.nextUrl;
 
   const isGuestRoute = guestRoutes.some((route) => pathname.startsWith(route));
@@ -28,10 +23,6 @@ export function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     "/dashboard/:path*",
-    "/kyci-dashboard/:path*",
-    "/kyc-supervisor/:path*",
-    "/kyc-approval-supervisor/:path*",
-    "/physical-verification/:path*",
     "/settings/:path*",
     "/profile/:path*",
     "/login",

@@ -20,7 +20,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   //   const cookieStore = await cookies();
-  //   const encryptedToken = cookieStore.get("cred-crm-ticket-tok")?.value;
+  //   const encryptedToken = cookieStore.get("fast-support-tok")?.value;
 
   //   if (!encryptedToken) {
   //     redirect("/login");

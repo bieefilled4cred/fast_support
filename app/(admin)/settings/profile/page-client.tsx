@@ -72,7 +72,7 @@ export default function ProfileSettingsPageClient() {
       <div className="mb-4 sm:mb-6 lg:mb-8 w-full bg-white px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
         <div className="mb-3 sm:mb-4 lg:mb-6">
           <Breadcrumb>
-            <BreadcrumbList className=" font-[500] text-xs sm:text-sm lg:text-base">
+            <BreadcrumbList className=" font-medium text-xs sm:text-sm lg:text-base">
               <BreadcrumbItem className="text-[#A9A9A9]">
                 <BreadcrumbLink
                   href="/dashboard"
@@ -85,10 +85,7 @@ export default function ProfileSettingsPageClient() {
                 <Play className="text-[#CCCCCC] h-2 w-2 sm:h-3 sm:w-3 lg:h-4 lg:w-4" />
               </BreadcrumbSeparator>
               <BreadcrumbItem className="text-[#A9A9A9]">
-                <BreadcrumbLink
-                  href="/settings"
-                  className="hover:text-gray-700"
-                >
+                <BreadcrumbLink href="#" className="hover:text-gray-700">
                   Settings
                 </BreadcrumbLink>
               </BreadcrumbItem>

@@ -10,20 +10,19 @@ import {
 
 import { SidebarMenuButton, SidebarTrigger } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
-// import { getAuthenticatedUserQueryOptions } from "@/query-options/usersQueryOption";
 import { useQuery } from "@tanstack/react-query";
 import { Bell, X, ChevronRight } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { getRouteTitle } from "@/utils/routeTitles";
+import { getAuthenticatedUserQueryOptions } from "@/app/query-options/usersQueryOption";
 
 export default function HeaderDropdown() {
   const pathName = usePathname();
   const router = useRouter();
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-  // const { data: authenticatedUser, isLoading: isLoadingAuthenticatedUser } = useQuery(
-  //   getAuthenticatedUserQueryOptions()
-  // );
+  const { data: authenticatedUser, isLoading: isLoadingAuthenticatedUser } =
+    useQuery(getAuthenticatedUserQueryOptions());
 
   const app_name = getRouteTitle(pathName);
 
@@ -145,8 +144,9 @@ export default function HeaderDropdown() {
                           </div>
                         ) : (
                           <div className="w-8 h-8 bg-linear-to-br from-[#04B2F1] to-[#0284B2] rounded-full flex items-center justify-center">
-                            <span className="text-white text-sm font-bold ">
-                              SA
+                            <span className="text-white text-sm font-bold uppercase ">
+                              {authenticatedUser?.data.firstName?.[0]}
+                              {authenticatedUser?.data.lastName?.[0]}
                             </span>
                           </div>
                         )}
@@ -191,17 +191,23 @@ export default function HeaderDropdown() {
             <SidebarMenuButton className="">
               <div className="flex justify-center items-center h-[24px] w-[24px] bg-[#F5FAFF] rounded-full">
                 <Avatar>
-                  <AvatarImage src="https://github.com/shadcn.png" />
-                  <AvatarFallback>CN</AvatarFallback>
+                  <AvatarImage
+                    src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${authenticatedUser?.data.firstName}`}
+                  />
+                  <AvatarFallback>
+                    {authenticatedUser?.data.firstName?.[0]}
+                    {authenticatedUser?.data.lastName?.[0]}
+                  </AvatarFallback>
                 </Avatar>
               </div>
-              {/* {isLoadingAuthenticatedUser ? (
+              {isLoadingAuthenticatedUser ? (
                 <Skeleton className="h-6 w-24 rounded" />
               ) : (
                 <span className=" text-[#3A3A3A]">
-                  {authenticatedUser?.data.firstName} {authenticatedUser?.data.lastName}
+                  {authenticatedUser?.data.firstName}{" "}
+                  {authenticatedUser?.data.lastName}
                 </span>
-              )} */}
+              )}
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent>

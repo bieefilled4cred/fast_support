@@ -1,4 +1,6 @@
 "use client";
+import { useLogoutMutation } from "@/app/query-options/authenticationQueryOption";
+import { getAuthenticatedUserQueryOptions } from "@/app/query-options/usersQueryOption";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Sidebar,
@@ -13,8 +15,6 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
-// import { useLogoutMutation } from "@/query-options/authenticationQueryOption";
-// import { getAuthenticatedUserQueryOptions } from "@/query-options/usersQueryOption";
 
 import { sidebarLinks } from "@/utils/routes";
 import { useQuery } from "@tanstack/react-query";
@@ -27,13 +27,12 @@ import { usePathname, useRouter } from "next/navigation";
 export default function AppSidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  // const { data: authenticatedUser, isLoading: isLoadingAuthenticatedUser } =
-  //   useQuery(getAuthenticatedUserQueryOptions());
+  const { data: authenticatedUser, isLoading: isLoadingAuthenticatedUser } =
+    useQuery(getAuthenticatedUserQueryOptions());
 
-  // const { mutate: logOut, isPending: isLoggingOut } = useLogoutMutation();
+  const { mutate: logOut, isPending: isLoggingOut } = useLogoutMutation();
 
-  // const userRoles = authenticatedUser?.data?.roles;
-  const userRoles = ["Super Admin"];
+  const userRoles = authenticatedUser?.data?.roles || [];
 
   const filteredLinks =
     userRoles && Array.isArray(userRoles)
@@ -56,11 +55,11 @@ export default function AppSidebar() {
   }, {});
 
   function handleLogout() {
-    // logOut(undefined, {
-    //   onSuccess: () => {
-    //     router.replace("/login");
-    //   },
-    // });
+    logOut(undefined, {
+      onSuccess: () => {
+        router.replace("/login");
+      },
+    });
   }
 
   return (
@@ -176,13 +175,13 @@ export default function AppSidebar() {
                   <button
                     onClick={handleLogout}
                     type="button"
-                    disabled={true}
+                    disabled={isLoggingOut}
                     className={`cursor-pointer relative flex items-center  hover: py-[20px] px-[14px] text-[#04B2F1] rounded-none ${
                       pathname === "/logout" &&
                       "hover: text-[#ffffff]! bg-primary hover:bg-primary!  "
-                    } ${true ? "opacity-50 cursor-not-allowed" : ""}`}
+                    } ${isLoggingOut ? "opacity-50 cursor-not-allowed" : ""}`}
                   >
-                    {false ? (
+                    {isLoggingOut ? (
                       <Loader2 className="animate-spin text-[#FC5A5A]" />
                     ) : (
                       <LogOut
@@ -209,12 +208,17 @@ export default function AppSidebar() {
             <SidebarMenuButton className="hover:text-primary py-2 h-auto group-data-[collapsible=icon]:p-1! hover:bg-white!">
               <div className="flex items-center gap-x-2">
                 <Avatar>
-                  <AvatarImage src="https://github.com/shadcn.png" />
-                  <AvatarFallback>CN</AvatarFallback>
+                  <AvatarImage
+                    src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${authenticatedUser?.data.firstName}`}
+                  />
+                  <AvatarFallback>
+                    {authenticatedUser?.data.firstName?.[0]}
+                    {authenticatedUser?.data.lastName?.[0]}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col">
                   {/* isLoadingAuthenticatedUser */}
-                  {false ? (
+                  {isLoadingAuthenticatedUser ? (
                     <>
                       <Skeleton className="w-[120px] h-[14px] mb-1" />
                       <Skeleton className="w-[160px] h-[13px]" />
@@ -222,13 +226,11 @@ export default function AppSidebar() {
                   ) : (
                     <>
                       <span className="text-[#262626] text-[14px]">
-                        {/* {authenticatedUser?.data.firstName}{" "}
-                        {authenticatedUser?.data.lastName} */}
-                        user
+                        {authenticatedUser?.data.firstName}{" "}
+                        {authenticatedUser?.data.lastName}
                       </span>
                       <span className="text-[#BFBFBF] text-[13px]">
-                        {/* {authenticatedUser?.data.email} */}
-                        user.name@chredlance.com
+                        {authenticatedUser?.data.email}
                       </span>
                     </>
                   )}

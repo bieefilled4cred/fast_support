@@ -15,14 +15,27 @@ import {
 import { StatsCard } from "./components/StatsCard";
 import { QuickActionCard } from "./components/QuickActionCard";
 import { RecentActivityTable } from "./components/RecentActivityTable";
+import { getAuthenticatedUserQueryOptions } from "@/app/query-options/usersQueryOption";
+import { useQuery } from "@tanstack/react-query";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const DashboardClient = () => {
+  const { data: authenticatedUser, isLoading: isLoadingAuthenticatedUser } =
+    useQuery(getAuthenticatedUserQueryOptions());
+  const fullname = `${authenticatedUser?.data.firstName} ${authenticatedUser?.data.lastName}`;
   return (
     <div className="mx-8 my-8 space-y-8">
       <div>
-        <p className="text-gray-500">
-          Welcome back, Admin. Here's what's happening today.
-        </p>
+        <h1 className="text-2xl font-bold">Dashboard</h1>
+        {isLoadingAuthenticatedUser ? (
+          <Skeleton className="h-5 w-72 mt-2" />
+        ) : (
+          <p className="text-gray-500 font-inter">
+            Welcome back,{" "}
+            <span className="font-bold text-primary/80">{fullname}</span>. Here's
+            what's happening today.
+          </p>
+        )}
       </div>
 
       {/* Stats Overview */}
