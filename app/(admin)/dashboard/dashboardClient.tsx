@@ -30,10 +30,10 @@ const DashboardClient = () => {
         {isLoadingAuthenticatedUser ? (
           <Skeleton className="h-5 w-72 mt-2" />
         ) : (
-          <p className="text-gray-500 font-inter">
+          <p className="text-gray-500 font-inter py-4">
             Welcome back,{" "}
-            <span className="font-bold text-primary/80">{fullname}</span>. Here's
-            what's happening today.
+            <span className="font-bold text-primary/80">{fullname}</span>.
+            Here's what's happening today.
           </p>
         )}
       </div>

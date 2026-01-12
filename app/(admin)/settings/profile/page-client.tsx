@@ -30,6 +30,8 @@ import { Play, X, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { getAuthenticatedUserQueryOptions } from "@/app/query-options/usersQueryOption";
 import { Application } from "@/app/types";
+import { Avatar, AvatarFallback } from "@radix-ui/react-avatar";
+import { AvatarImage } from "@/components/ui/avatar";
 
 export default function ProfileSettingsPageClient() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -129,19 +131,23 @@ export default function ProfileSettingsPageClient() {
         ) : (
           <>
             <Card className="shadow-none border-0">
-              <CardContent className="p-4 !pl-0 !pt-0 sm:p-6">
+              <CardContent className="p-4 pl-0! pt-0! sm:p-6">
                 <h3 className="text-base sm:text-lg font-semibold text-[#464646]  mb-3 sm:mb-4">
                   Your Profile Picture
                 </h3>
 
                 <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
-                  <div className="relative flex-shrink-0">
-                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-[#04B2F1] to-[#0284B2] rounded-full flex items-center justify-center">
-                      <span className="text-white text-lg sm:text-xl font-bold ">
-                        {user?.firstName?.charAt(0)}
-                        {user?.lastName?.charAt(0)}
-                      </span>
-                    </div>
+                  <div className="relative shrink-0">
+                    <Avatar>
+                      <AvatarImage
+                        src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${authenticatedUser?.data.firstName}`}
+                        className="rounded-full bg-primary w-24 h-24"
+                      />
+                      <AvatarFallback className="rounded-full bg-primary">
+                        {authenticatedUser?.data.firstName?.[0]}
+                        {authenticatedUser?.data.lastName?.[0]}
+                      </AvatarFallback>
+                    </Avatar>
                   </div>
 
                   <div className="flex-1 text-center sm:text-left">
@@ -192,7 +198,7 @@ export default function ProfileSettingsPageClient() {
             </Card>
 
             <Card className="shadow-none border-0">
-              <CardContent className="py-4 sm:p-6 !p-0">
+              <CardContent className="py-4 sm:p-6 p-0!">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                   <div className="space-y-3 sm:space-y-4">
                     <div>
@@ -336,7 +342,7 @@ export default function ProfileSettingsPageClient() {
                   Role
                 </Label>
                 <Select>
-                  <SelectTrigger className="w-full !h-[56px] sm:h-14 px-3 border border-gray-300 rounded-lg text-gray-900 mt-3">
+                  <SelectTrigger className="w-full h-[56px]! sm:h-14 px-3 border border-gray-300 rounded-lg text-gray-900 mt-3">
                     <SelectValue placeholder="Select Role" />
                   </SelectTrigger>
                   <SelectContent>

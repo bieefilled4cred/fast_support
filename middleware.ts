@@ -1,10 +1,11 @@
+// Middleware for authentication
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 const guestRoutes = ["/login", "/reset-password", "/forgot-password"];
 
 export function middleware(request: NextRequest) {
-  const token = request.cookies.get("fast-support-tok")?.value;
+  const token = request.cookies.get("cred-crm-ticket-tok")?.value;
   const { pathname } = request.nextUrl;
 
   const isGuestRoute = guestRoutes.some((route) => pathname.startsWith(route));

@@ -8,6 +8,7 @@ import {
   Mail,
   Phone,
   Calendar,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -24,12 +25,13 @@ import {
 export function ProfileActivationCard({
   data,
   onActivate,
+  isUpdating,
 }: {
   data: ActivationProfile;
-  onActivate: () => void;
+  onActivate: () => Promise<boolean>;
+  isUpdating: boolean;
 }) {
   const [open, setOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
 
   // Format currency
   const formatCurrency = (amount: number) => {
@@ -47,17 +49,14 @@ export function ProfileActivationCard({
     });
   };
 
-  const handleConfirmActivation = () => {
-    setIsLoading(true);
-    // Simulate API delay
-    setTimeout(() => {
-      onActivate();
-      setIsLoading(false);
+  const handleConfirmAction = async () => {
+    const success = await onActivate();
+    if (success) {
       setOpen(false);
-    }, 1500);
+    }
   };
 
-  const isActive = data.status.toLowerCase() === "active";
+  const isActive = data.status?.toLowerCase() === "active";
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -102,69 +101,78 @@ export function ProfileActivationCard({
                     : "bg-red-100 text-red-800"
                 }`}
               >
-                {isActive ? "Active Account" : `${data.status} Account`}
+                {isActive
+                  ? "Active Account"
+                  : `${data.status || "Inactive"} Account`}
               </span>
               <span className="text-gray-300">•</span>
               <span className="text-sm text-gray-500">{data.tier}</span>
             </div>
           </div>
 
-          {!isActive && (
-            <Dialog open={open} onOpenChange={setOpen}>
-              <DialogTrigger asChild>
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              {isActive ? (
+                <Button className="bg-red-600 hover:bg-red-700 text-white shadow-md shadow-red-200">
+                  <XCircle className="w-4 h-4 mr-2" />
+                  Suspend Profile
+                </Button>
+              ) : (
                 <Button className="bg-green-600 hover:bg-green-700 text-white shadow-md shadow-green-200">
                   <CheckCircle2 className="w-4 h-4 mr-2" />
                   Activate Profile
                 </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Activate User Profile</DialogTitle>
-                  <DialogDescription>
-                    Are you sure you want to activate this profile? This will
-                    restore full access to the user's account services.
-                  </DialogDescription>
-                </DialogHeader>
+              )}
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>
+                  {isActive ? "Suspend" : "Activate"} User Profile
+                </DialogTitle>
+                <DialogDescription>
+                  {isActive
+                    ? "Are you sure you want to suspend this profile? This will restrict the user's access to account services."
+                    : "Are you sure you want to activate this profile? This will restore full access to the user's account services."}
+                </DialogDescription>
+              </DialogHeader>
 
-                <div className="bg-yellow-50 border border-yellow-100 rounded-md p-4 my-2 flex gap-3">
-                  <AlertTriangle
-                    className="text-yellow-600 shrink-0"
-                    size={20}
-                  />
-                  <div className="text-sm text-yellow-800">
-                    <p className="font-semibold">Verification Required</p>
-                    <p>
-                      Ensure you have verified the user's identity before
-                      proceeding with activation.
-                    </p>
-                  </div>
+              <div className="bg-yellow-50 border border-yellow-100 rounded-md p-4 my-2 flex gap-3">
+                <AlertTriangle className="text-yellow-600 shrink-0" size={20} />
+                <div className="text-sm text-yellow-800">
+                  <p className="font-semibold">Verification Required</p>
+                  <p>
+                    {isActive
+                      ? "Ensure you have a valid reason for suspending this account."
+                      : "Ensure you have verified the user's identity before proceeding with activation."}
+                  </p>
                 </div>
+              </div>
 
-                <DialogFooter>
-                  <Button variant="outline" onClick={() => setOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={handleConfirmActivation}
-                    className="bg-green-600 hover:bg-green-700 text-white"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? "Activating..." : "Confirm Activation"}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          )}
-
-          {isActive && (
-            <Button
-              disabled
-              variant="outline"
-              className="border-green-200 bg-green-50 text-green-700 cursor-default"
-            >
-              <CheckCircle2 className="w-4 h-4 mr-2" /> Profile Active
-            </Button>
-          )}
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setOpen(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleConfirmAction}
+                  className={
+                    isActive
+                      ? "bg-red-600 hover:bg-red-700 text-white"
+                      : "bg-green-600 hover:bg-green-700 text-white"
+                  }
+                  disabled={isUpdating}
+                >
+                  {isUpdating ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      {isActive ? "Suspending..." : "Activating..."}
+                    </>
+                  ) : (
+                    `Confirm ${isActive ? "Suspension" : "Activation"}`
+                  )}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
 
         <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -191,7 +199,7 @@ export function ProfileActivationCard({
               <InfoRow
                 icon={<Calendar size={16} />}
                 label="Joined"
-                value={formatDate(data.dateCreated)}
+                value={formatDate(data.createdDate)}
               />
             </div>
           </div>
@@ -210,13 +218,13 @@ export function ProfileActivationCard({
               <div className="flex justify-between items-center text-sm">
                 <span className="text-gray-500">Current Balance</span>
                 <span className="font-bold text-[#0284B2] text-base">
-                  {formatCurrency(data.accountBalance)}
+                  {formatCurrency(data.balance)}
                 </span>
               </div>
               <div className="flex justify-between items-center text-sm">
-                <span className="text-gray-500">Last Login</span>
-                <span className="text-gray-700">
-                  {formatDate(data.lastLogin)}
+                <span className="text-gray-500">Profile ID</span>
+                <span className="text-gray-700 font-mono text-xs">
+                  {data.id}
                 </span>
               </div>
             </div>

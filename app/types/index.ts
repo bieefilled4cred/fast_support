@@ -2,10 +2,18 @@ export * from "./api";
 export * from "./permissions";
 export * from "./authentication";
 export * from "./users";
-export * from "./departments";
 export * from "./transactions";
 export * from "./applications";
 export * from "./customers";
+export * from "./referralAnalytics";
+export * from "./depositAnalytics";
+export * from "./accountSearch";
+export * from "./profileSearch";
+export * from "./transactionSummary";
+export * from "./bvnLookup";
+export * from "./emailUpdate";
+export * from "./profileActivation";
+export * from "./vasRequery";
 
 export interface ResetPasswordPayload {
   username: string;

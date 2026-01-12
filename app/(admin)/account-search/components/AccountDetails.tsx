@@ -233,7 +233,7 @@ function InfoItem({
           {label}
         </span>
       </div>
-      <div className="font-medium text-gray-900 break-words pl-[26px]">
+      <div className="font-medium text-gray-900 wrap-break-words pl-[26px]">
         {value || "N/A"}
       </div>
     </div>

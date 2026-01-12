@@ -1,8 +1,9 @@
 import { queryOptions, useMutation } from "@tanstack/react-query";
 
-import { APIError, ApiResponse, CreatePermissionGroupPayload, PermissionGroupResponse } from "@/types";
-import { PERMISSION_API } from "@/services/permissionService/permissionService";
-import { api } from "@/lib/apiClient";
+import { APIError, ApiResponse, CreatePermissionGroupPayload, PermissionGroupResponse } from "../types";
+import { PERMISSION_API } from "../services/permissionService/permissionService";
+import { api } from "../lib/apiClient";
+
 
 const getPermissions = (groupId: string) => api(`${PERMISSION_API.getPermissions}/${groupId}`);
 

@@ -34,7 +34,7 @@ export interface EmailUpdateProfile {
   gender: string;
   referralCode: string;
   createdDate: string;
-  status: string;
+  status: string | null;
 }
 
 export interface EmailUpdateSearchResponse {

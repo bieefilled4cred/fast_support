@@ -3,63 +3,38 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search } from "lucide-react";
+import { Search, Loader2 } from "lucide-react";
 import { AccountDetails } from "./components/AccountDetails";
-import { AccountRecord, AccountSearchResponse } from "./types";
-
-// Mock Data
-const MOCK_RESPONSE: AccountSearchResponse = {
-  data: {
-    data: [
-      {
-        id: "a974e7de-c9b7-4b35-9228-764845a562af",
-        accountNumber: "1000045768",
-        customerID: "00000022",
-        customerName: "IBRAHIM OMOTAYO ABDULLAHI",
-        accountName: "IBRAHIM OMOTAYO ABDULLAHI",
-        accountType: "Savings",
-        branchName: "Head Office Branch",
-        productName: "DIGITVANT STAFF TARGET SAVINGS ",
-        accountOfficerName: "ALADEKOYE SAMUEL",
-        accountStatus: "Active",
-        ledgerBalance: 0,
-        availableBalance: 0,
-        firstName: "OMOTAYO",
-        lastName: "IBRAHIM",
-        phoneNumber: "2348102796273",
-        bvn: "22183098463",
-        email: "omotayofolorunso046@gmail.com",
-        dateOfBirth: "1991-04-30T00:00:00",
-        gender: "Male",
-        accountTierLevel: 3,
-        accessLevel: 1,
-        enableEmailNotification: true,
-        enableSMSNotification: true,
-        statementDeliveryMode: "Email",
-        statementDeliveryFrequency: "Monthly",
-        minimumBalanceRequired: 0,
-        accountCreationChannel: "Web",
-        address: "25, MEIRAN ROAD, ALIMOSHO, LAGOS",
-        meansOfIdentification: "NationalID",
-        idNumber: "51330321447",
-      },
-    ],
-    recordCount: 1,
-  },
-  status: true,
-  message: "Request successful",
-};
+import { AccountRecord } from "./types";
+import { useAccountDetailMutation } from "@/app/query-options/accountSearchQueryOption";
 
 const AccountSearchClient = () => {
   const [accountNumber, setAccountNumber] = useState("");
-  const [data, setData] = useState<AccountRecord[]>([]);
+  const [data, setData] = useState<AccountRecord | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
 
+  const accountDetailMutation = useAccountDetailMutation();
+
   const handleSearch = () => {
-    console.log("Searching for account:", accountNumber);
-    // Simulate API call
-    setData(MOCK_RESPONSE.data.data);
-    setHasSearched(true);
+    if (!accountNumber.trim()) return;
+
+    accountDetailMutation.mutate(accountNumber.trim(), {
+      onSuccess: (response) => {
+        setData(response.data);
+        setHasSearched(true);
+      },
+      onError: (error) => {
+        console.error("Error fetching account details:", error);
+        setData(null);
+        setHasSearched(true);
+      },
+    });
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
   };
 
   return (
@@ -77,17 +52,40 @@ const AccountSearchClient = () => {
             placeholder="Enter Account Number"
             value={accountNumber}
             onChange={(e) => setAccountNumber(e.target.value)}
+            onKeyPress={handleKeyPress}
           />
         </div>
         <Button
           onClick={handleSearch}
-          className="bg-[#0284B2] hover:bg-[#026a8f] text-white"
+          disabled={!accountNumber.trim() || accountDetailMutation.isPending}
+          className="bg-[#0284B2] hover:bg-[#026a8f] text-white disabled:opacity-50"
         >
-          <Search className="mr-2 h-4 w-4" /> Search Account
+          {accountDetailMutation.isPending ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Searching...
+            </>
+          ) : (
+            <>
+              <Search className="mr-2 h-4 w-4" />
+              Search Account
+            </>
+          )}
         </Button>
       </div>
 
-      {hasSearched && (
+      {/* Error Message */}
+      {accountDetailMutation.isError && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
+          <p className="font-medium">Error loading account details</p>
+          <p className="text-sm">
+            {accountDetailMutation.error?.message ||
+              "Account not found or an error occurred"}
+          </p>
+        </div>
+      )}
+
+      {hasSearched && !accountDetailMutation.isError && (
         <div className="">
           <div className="mb-4">
             <h3 className="text-lg font-medium">Search Results</h3>
@@ -97,8 +95,8 @@ const AccountSearchClient = () => {
               </p>
             )}
           </div>
-          {data.length > 0 ? (
-            <AccountDetails data={data[0]} />
+          {data ? (
+            <AccountDetails data={data} />
           ) : (
             <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 text-center text-gray-500">
               No account found.

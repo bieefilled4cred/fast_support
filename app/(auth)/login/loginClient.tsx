@@ -8,7 +8,7 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input"; 
+import { Input } from "@/components/ui/input";
 import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -44,6 +44,9 @@ const LoginClient = () => {
 
     loginMutation(trimmedValues, {
       onSuccess: (data: LoginResponse) => {
+        toast.success("Login successful! Welcome back.");
+        
+
         setUser({
           email: trimmedValues.username,
           password: trimmedValues.password,
@@ -53,8 +56,7 @@ const LoginClient = () => {
         });
 
         if (data.isNewUser || data.status === "Temporary") {
-          toast.success("Login successful! Welcome back.");
-          router.push("/dashboard");
+          router.replace("/dashboard");
           return;
         }
 
@@ -66,7 +68,7 @@ const LoginClient = () => {
           }
         }
 
-        router.push("/dashboard");
+        router.replace("/dashboard");
       },
       onError: (error: APIError) => {
         const errorMessage =

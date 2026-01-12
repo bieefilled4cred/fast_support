@@ -8,7 +8,7 @@ export default async function AuthLayout({
   children: ReactNode;
 }) {
   const cookieStore = await cookies();
-  const encryptedToken = cookieStore.get("fast_support-tok")?.value;
+  const encryptedToken = cookieStore.get("cred-crm-ticket-tok")?.value;
 
   if (encryptedToken) {
     redirect("/dashboard");

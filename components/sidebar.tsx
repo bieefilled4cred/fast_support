@@ -210,6 +210,7 @@ export default function AppSidebar() {
                 <Avatar>
                   <AvatarImage
                     src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${authenticatedUser?.data.firstName}`}
+                    className="rounded-full bg-primary/80"
                   />
                   <AvatarFallback>
                     {authenticatedUser?.data.firstName?.[0]}

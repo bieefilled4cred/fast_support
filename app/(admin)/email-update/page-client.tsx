@@ -1,65 +1,24 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Loader2 } from "lucide-react";
 import { UserDetailCard } from "./components/UserDetailCard";
-import { EmailUpdateProfile, EmailUpdateSearchResponse } from "./types";
-// import { toast } from "sonner";
-
-// Mock Data
-const MOCK_RESPONSE: EmailUpdateSearchResponse = {
-  data: [
-    {
-      id: "42d3cf86e8c94cc8b0ec8fb733939b13",
-      firstName: "OMOTAYO ABDULLAHI",
-      lastName: "IBRAHIM",
-      avatar: null,
-      bvnRealName: null,
-      tier: "Tier1",
-      accountNumber: "1000045768",
-      email: "omotayofolorunso046@gmail.com",
-      dob: "1991-04-30T00:00:00",
-      bvn: "22183098463",
-      bvnIsVerified: true,
-      hasProfilePicture: false,
-      hasAccountNumber: true,
-      phoneVerified: false,
-      transactionPinSet: true,
-      balance: 0,
-      profileType: "Individual",
-      productType: null,
-      phoneNumber: "2348102796273",
-      address: null,
-      coreBankId: "00000022",
-      requiresOtp: false,
-      totalLimit: 10000100,
-      accruedLimit: 2000,
-      addressDocumentSubmitted: false,
-      addressDocumentVerified: false,
-      totalReferrals: 6,
-      nin: null,
-      ninIsVerified: false,
-      bvnProfileUrl: null,
-      bvnUrlUpdated: false,
-      referredBy: "OSEZOZ",
-      gender: "M",
-      referralCode: "OSEZOZ",
-      createdDate: "2025-03-25T13:19:44.10575",
-      status: "Active",
-    },
-  ],
-  isSuccessful: true,
-  message: "Operation successful",
-  code: "0",
-};
+import { EmailUpdateProfile } from "./types";
+import {
+  useEmailUpdateProfileMutation,
+  useUpdateEmailMutation,
+} from "@/app/query-options/emailUpdateQueryOption";
+import { toast } from "sonner";
 
 const EmailUpdateClient = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [userData, setUserData] = useState<EmailUpdateProfile | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const profileMutation = useEmailUpdateProfileMutation();
+  const updateEmailMutation = useUpdateEmailMutation();
 
   const handleSearch = () => {
     setError("");
@@ -70,33 +29,58 @@ const EmailUpdateClient = () => {
       return;
     }
 
-    setIsLoading(true);
-
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      // Logic to find user (simulated)
-      // Check if search query matches mock data ID or Account Number
-      const mockUser = MOCK_RESPONSE.data[0];
-      if (
-        searchQuery === mockUser.id ||
-        searchQuery === mockUser.accountNumber ||
-        searchQuery === "1000045768" // Fallback for demo ease
-      ) {
-        setUserData(mockUser);
-      } else {
-        // return data anyway for demo if not strictly matching to allow easy testing by user
-        setUserData(mockUser);
-      }
-    }, 1000);
+    profileMutation.mutate(searchQuery.trim(), {
+      onSuccess: (response) => {
+        if (
+          response.isSuccessful &&
+          response.data &&
+          response.data.length > 0
+        ) {
+          setUserData(response?.data[0]);
+        } else {
+          setError(response.message || "No profile found");
+        }
+      },
+      onError: (err) => {
+        console.error("Error fetching profile:", err);
+        setError(err.message || "Failed to fetch profile. Please try again.");
+      },
+    });
   };
 
-  const handleUpdateEmail = (newEmail: string) => {
-    if (userData) {
-      setUserData({ ...userData, email: newEmail });
-      // In a real app, you would verify success via API response
-      // alert("Email updated successfully!");
+  const handleUpdateEmail = async (newEmail: string): Promise<boolean> => {
+    if (!userData || !userData.coreBankId) {
+      toast.error("Cannot update email: Missing core bank ID");
+      return false;
     }
+
+    return new Promise((resolve) => {
+      updateEmailMutation.mutate(
+        {
+          coreBankId: userData.coreBankId,
+          email: newEmail,
+        },
+        {
+          onSuccess: (response) => {
+            if (response.isSuccessful) {
+              setUserData({ ...userData, email: newEmail });
+              toast.success("Email updated successfully!");
+              resolve(true);
+            } else {
+              toast.error(response.message || "Failed to update email");
+              resolve(false);
+            }
+          },
+          onError: (err) => {
+            console.error("Error updating email:", err);
+            toast.error(
+              err.message || "Failed to update email. Please try again."
+            );
+            resolve(false);
+          },
+        }
+      );
+    });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -135,10 +119,10 @@ const EmailUpdateClient = () => {
           </div>
           <Button
             onClick={handleSearch}
-            disabled={isLoading || !searchQuery}
-            className="bg-[#0284B2] hover:bg-[#026a8f] text-white h-12 px-6"
+            disabled={profileMutation.isPending || !searchQuery}
+            className="bg-[#0284B2] hover:bg-[#026a8f] text-white h-12 px-6 disabled:opacity-50"
           >
-            {isLoading ? (
+            {profileMutation.isPending ? (
               <Loader2 className="h-5 w-5 animate-spin" />
             ) : (
               "Search"
@@ -152,7 +136,11 @@ const EmailUpdateClient = () => {
 
       {userData && (
         <div className="max-w-2xl mx-auto mt-8">
-          <UserDetailCard data={userData} onUpdateEmail={handleUpdateEmail} />
+          <UserDetailCard
+            data={userData}
+            onUpdateEmail={handleUpdateEmail}
+            isUpdating={updateEmailMutation.isPending}
+          />
         </div>
       )}
     </div>

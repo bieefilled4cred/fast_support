@@ -6,40 +6,15 @@ import { Button } from "@/components/ui/button";
 import { Search, Loader2 } from "lucide-react";
 import { TransactionDetailsCard } from "./components/TransactionDetailsCard";
 import { RequeryVasResponse } from "./types";
-import { toast } from "sonner"; // Using sonner for toasts
-
-// Mock Data
-const MOCK_SUCCESS_RESPONSE: RequeryVasResponse = {
-  details: {
-    message: "Transaction retrieved successfully",
-    data: {
-      transactionRef: "782054228912",
-      requestId: "REQ_123456789",
-      amount: 5000,
-      date: "2023-11-20T14:30:00",
-      status: "Successful",
-      billerName: "MTN Airtime",
-      customerLine: "08031234567",
-      gatewayResponse: "Approved by Financial Institution",
-    },
-  },
-  confirmationMessage: "Success",
-  confirmationCode: 200,
-};
-
-const MOCK_ERROR_RESPONSE: RequeryVasResponse = {
-  details: {
-    message: "Transaction not found",
-  },
-  confirmationMessage: "Not Found",
-  confirmationCode: 404,
-};
+import { useRequeryVasMutation } from "@/app/query-options/vasRequeryQueryOption";
+import { toast } from "sonner";
 
 const RequeryVasClient = () => {
   const [transactionRef, setTransactionRef] = useState("");
   const [result, setResult] = useState<RequeryVasResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const requeryMutation = useRequeryVasMutation();
 
   const handleSearch = () => {
     setError("");
@@ -50,24 +25,38 @@ const RequeryVasClient = () => {
       return;
     }
 
-    setIsLoading(true);
+    requeryMutation.mutate(transactionRef.trim(), {
+      onSuccess: (response) => {
+        console.log("Requery response:", response);
+        setResult(response);
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      // Logic for demo: Use specific ID to trigger success, otherwise showing not found (or specific known not-found ID)
-      if (transactionRef === "0708e7fbcf07471ebb90bd2226a3e92f") {
-        setResult(MOCK_ERROR_RESPONSE); // As per user request example for this specific generic string format
-      } else if (transactionRef === "SUCCESS") {
-        setResult(MOCK_SUCCESS_RESPONSE);
-      } else {
-        // Default to not found for unknown strings for this safety check demo
-        setResult(MOCK_ERROR_RESPONSE);
-      }
-    }, 1500);
+        if (response.confirmationCode === 200) {
+          toast.success("Transaction Found", {
+            description:
+              response.details.message ||
+              "Transaction details retrieved successfully.",
+          });
+        } else if (response.confirmationCode === 404) {
+          toast.error("Not Found", {
+            description: response.details.message || "Transaction not found.",
+          });
+        }
+      },
+      onError: (err) => {
+        console.error("Error querying transaction:", err);
+        setError(
+          err.message || "Failed to query transaction. Please try again."
+        );
+        toast.error("Query Failed", {
+          description:
+            err.message || "An error occurred while querying the transaction.",
+        });
+      },
+    });
   };
 
   const handleReverse = (ref: string) => {
+    // TODO: Implement actual reversal API when available
     toast.success("Reversal Initiated", {
       description: `Reversal process started for transaction ${ref}`,
     });
@@ -81,7 +70,7 @@ const RequeryVasClient = () => {
 
   return (
     <div className="mx-8 my-5 space-y-6">
-      <p className="text-gray-500">View and managed VAS transaction details.</p>
+      <p className="text-gray-500">View and manage VAS transaction details.</p>
 
       <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 max-w-2xl mx-auto">
         <div className="text-center mb-6">
@@ -109,22 +98,19 @@ const RequeryVasClient = () => {
           </div>
           <Button
             onClick={handleSearch}
-            disabled={isLoading || !transactionRef}
+            disabled={requeryMutation.isPending || !transactionRef}
             className="bg-[#0284B2] hover:bg-[#026a8f] text-white h-12 px-6"
           >
-            {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Check"}
+            {requeryMutation.isPending ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              "Check"
+            )}
           </Button>
         </div>
         {error && (
           <p className="text-red-500 text-sm mt-3 text-center">{error}</p>
         )}
-
-        {/* Helper hint for demo */}
-        <div className="mt-4 text-center">
-          <p className="text-xs text-gray-400">
-            Try "SUCCESS" for a valid transaction.
-          </p>
-        </div>
       </div>
 
       {result && (

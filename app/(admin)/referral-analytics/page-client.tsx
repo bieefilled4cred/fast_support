@@ -1,15 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import ReferralPieChart from "./components/ReferralPieChart";
 import ReferralAreaChart from "./components/ReferralAreaChart";
+import { ReferralTable, PaginatedResponse } from "./components/ReferralTable";
 import {
-  ReferralTable,
-  User,
-  PaginatedResponse,
-} from "./components/ReferralTable";
+  useReferralAnalyticsMutation,
+  useProfilesByRangeMutation,
+  generateRanges,
+  // DEFAULT_RANGES,
+} from "@/app/query-options/referralAnalyticsQueryOption";
+import { ReferralProfile } from "@/app/types";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const COLORS = [
   "#FF6B8B",
@@ -28,68 +33,140 @@ interface RangeData {
   range: string;
   count: number;
   fill: string;
+  min: number;
+  max: number;
+}
+
+// Map API user to table user format
+interface TableUser {
+  id: string;
+  accountNumber: string;
+  firstName: string;
+  lastName: string;
+  phone: string;
+  referralCode: string;
+  totalReferred: number;
 }
 
 const ReferralAnalyticsClient = () => {
   const [minVal, setMinVal] = useState<string>("0");
   const [maxVal, setMaxVal] = useState<string>("5");
-  const [data, setData] = useState<RangeData[]>(generateMockData(0, 5));
-  const [selectedRange, setSelectedRange] = useState<string | null>(null);
+  const [data, setData] = useState<RangeData[]>([]);
+  const [selectedRange, setSelectedRange] = useState<{
+    range: string;
+    min: number;
+    max: number;
+  } | null>(null);
+  const [profiles, setProfiles] = useState<TableUser[]>([]);
+  const [profilesLoading, setProfilesLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  function generateMockData(min: number, max: number): RangeData[] {
-    const step = max - min + 1;
-    const newData: RangeData[] = [];
-    let currentMin = min;
+  const { mutate: fetchAnalytics, isPending: isAnalyticsLoading } =
+    useReferralAnalyticsMutation();
+  const { mutate: fetchProfiles, isPending: isProfilesLoading } =
+    useProfilesByRangeMutation();
 
-    // Generate about 10 ranges with exponential decay for a realistic "referral" distribution
-    // (Most people have few referrals, very few have many)
-    let baseCount = 1100; // Starting high count
-
-    for (let i = 0; i < 10; i++) {
-      const currentMax = currentMin + step - 1;
-      const label =
-        i === 9 ? `>${currentMin - 1}` : `${currentMin}-${currentMax}`;
-
-      // Random decay factor between 0.03 and 0.1 for the first drop, then slower
-      const decay = i === 0 ? 1 : 0.05 + Math.random() * 0.05;
-      const count =
-        i === 0 ? baseCount : Math.floor(baseCount * decay * (1 / (i + 1)));
-
-      if (i > 0 && count === 0) {
-        // Ensure at least some small numbers for the tail
-        newData.push({
-          range: label,
-          count: Math.floor(Math.random() * 5) + 1,
-          fill: COLORS[i % COLORS.length],
-        });
-      } else {
-        newData.push({
-          range: label,
-          count: Math.max(1, count), // Ensure at least 1
-          fill: COLORS[i % COLORS.length],
-        });
-      }
-
-      // Reset baseCount for next iteration to create a curve
-      if (i === 0) baseCount = count;
-
-      currentMin += step;
-    }
-    return newData;
-  }
+  // Auto-fetch on mount with default ranges
+  useEffect(() => {
+    handleGenerate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleGenerate = () => {
     const min = parseInt(minVal) || 0;
-    const max = parseInt(maxVal) || 0;
-    if (max < min) return; // Simple validation
-    setData(generateMockData(min, max));
-    setSelectedRange(null);
+    const max = parseInt(maxVal) || 5;
+    if (max < min) {
+      toast.error("Max value must be greater than or equal to min value");
+      return;
+    }
+
+    const ranges = generateRanges(min, max);
+    const payload = {
+      isStaff: true,
+      ranges: ranges,
+    };
+    console.log("payload", payload);
+
+    fetchAnalytics(payload, {
+      onSuccess: (response) => {
+        // Response is array directly
+        if (Array.isArray(response)) {
+          const mappedData: RangeData[] = response.map((item, index) => {
+            // Parse min/max from range string (e.g., "0-5" or ">59")
+            let min = 0;
+            let max = 0;
+            if (item.range.startsWith(">")) {
+              min = parseInt(item.range.substring(1)) + 1;
+              max = min + 100; // Large number for "greater than" ranges
+            } else {
+              const parts = item.range.split("-");
+              min = parseInt(parts[0]) || 0;
+              max = parseInt(parts[1]) || 0;
+            }
+            return {
+              range: item.range,
+              count: item.count,
+              fill: COLORS[index % COLORS.length],
+              min,
+              max,
+            };
+          });
+          setData(mappedData);
+          setSelectedRange(null);
+          setProfiles([]);
+        }
+      },
+      onError: (error) => {
+        toast.error(error.message || "Failed to fetch referral analytics");
+      },
+    });
+  };
+
+  const handleRangeClick = (item: RangeData) => {
+    setSelectedRange({ range: item.range, min: item.min, max: item.max });
+    setProfilesLoading(true);
+    setCurrentPage(1);
+
+    fetchProfiles(
+      { isStaff: true, min: item.min, max: item.max },
+      {
+        onSuccess: (response) => {
+          const mappedProfiles: TableUser[] = (response.profiles || []).map(
+            (profile: ReferralProfile) => ({
+              id: profile.id,
+              accountNumber: profile.accountNumber || "",
+              firstName: profile.firstName || "",
+              lastName: profile.lastName || "",
+              phone: profile.phoneNumber || "",
+              referralCode: profile.referralCode || "",
+              totalReferred: profile.totalReferrals || 0,
+            })
+          );
+          setProfiles(mappedProfiles);
+          setProfilesLoading(false);
+        },
+        onError: (error) => {
+          toast.error(error.message || "Failed to fetch profiles");
+          setProfilesLoading(false);
+          setProfiles([]);
+        },
+      }
+    );
+  };
+
+  const tableData: PaginatedResponse<TableUser> = {
+    data: {
+      data: profiles,
+      totalPages: 1,
+      currentPage: currentPage,
+      totalItems: profiles.length,
+    },
   };
 
   return (
     <div className="mx-8 my-5 space-y-6">
       <p className="text-gray-500">
-        View and managed referral analytics details.
+        View and manage referral analytics details.
       </p>
       <div className="flex items-end gap-4 p-1">
         <div className="w-32">
@@ -116,20 +193,29 @@ const ReferralAnalyticsClient = () => {
         </div>
         <Button
           onClick={handleGenerate}
-          className="bg-[#198754] hover:bg-[#157347] text-white px-8"
+          disabled={isAnalyticsLoading}
+          className="bg-primary hover:bg-primary/80 text-white px-8"
         >
-          Generate Ranges
+          {isAnalyticsLoading ? "Loading..." : "Generate Ranges"}
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Pie Chart Section */}
-        <ReferralPieChart data={data} />
+      {isAnalyticsLoading ? (
+        <div className="flex items-center justify-center h-[400px] gap-4 lg:flex-row flex-col">
+          <Skeleton className="h-[400px]" />
+          <Skeleton className="h-[400px]" />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Pie Chart Section */}
+          <ReferralPieChart data={data} />
 
-        {/* Line/Area Chart Section */}
-        <ReferralAreaChart data={data} />
-      </div>
+          {/* Line/Area Chart Section */}
+          <ReferralAreaChart data={data} />
+        </div>
+      )}
 
+      {/* Range section */}
       <div className="mt-8">
         <h3 className="text-lg font-medium text-gray-900 mb-4">
           Click on a range to view profiles
@@ -138,10 +224,10 @@ const ReferralAnalyticsClient = () => {
           {data.map((item, index) => (
             <button
               key={index}
-              onClick={() => setSelectedRange(item.range)}
+              onClick={() => handleRangeClick(item)}
               className={`px-4 py-2 rounded-md border text-sm font-medium transition-colors
                 ${
-                  selectedRange === item.range
+                  selectedRange?.range === item.range
                     ? "bg-gray-800 text-white border-gray-800"
                     : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
                 }`}
@@ -156,70 +242,24 @@ const ReferralAnalyticsClient = () => {
         <div className="mt-6 flex flex-col space-y-4">
           <div className="flex justify-between items-center">
             <h3 className="text-xl font-semibold text-gray-900">
-              Profiles in range: {selectedRange}
+              Profiles in range: {selectedRange.range}
             </h3>
           </div>
-          <ReferralTable
-            data={
-              mockTableData[selectedRange] || {
-                data: {
-                  data: generateMockUsers(Math.floor(Math.random() * 15) + 1), // Generate random number of users
-                  totalPages: 1,
-                  currentPage: 1,
-                  totalItems: 10,
-                },
-              }
-            }
-            isLoading={false}
-            currentPage={1}
-            onPageChange={() => {}}
-            onEdit={(user) => console.log("Edit user", user)}
-          />
+          {profilesLoading ? (
+            <Skeleton className="h-[400px]" />
+          ) : (
+            <ReferralTable
+              data={tableData}
+              isLoading={profilesLoading || isProfilesLoading}
+              currentPage={currentPage}
+              onPageChange={setCurrentPage}
+              onEdit={(user) => console.log("Edit user", user)}
+            />
+          )}
         </div>
       )}
     </div>
   );
 };
-
-// --- Mock Data Helpers ---
-const emptyTableData: PaginatedResponse<User> = {
-  data: { data: [], totalPages: 0, currentPage: 1, totalItems: 0 },
-};
-
-const mockTableData: Record<string, PaginatedResponse<User>> = {};
-
-function generateMockUsers(count: number): User[] {
-  return Array.from({ length: count }).map((_, i) => ({
-    id: `user-${i}-${Math.random()}`,
-    accountNumber: `20${Math.floor(Math.random() * 90000000 + 10000000)}`,
-    firstName: [
-      "John",
-      "Jane",
-      "Mike",
-      "Sarah",
-      "David",
-      "Chris",
-      "Amanda",
-      "Daniel",
-    ][Math.floor(Math.random() * 8)],
-    lastName: [
-      "Doe",
-      "Smith",
-      "Johnson",
-      "Williams",
-      "Brown",
-      "Jones",
-      "Miller",
-      "Davis",
-    ][Math.floor(Math.random() * 8)],
-    phone: `080${Math.floor(Math.random() * 90000000 + 10000000)}`,
-    referralCode: `REF-${Math.random()
-      .toString(36)
-      .substring(2, 8)
-      .toUpperCase()}`,
-    totalReferred: Math.floor(Math.random() * 50) + 1,
-  }));
-}
-// Note: In a real app, we would fetch this data based on the selected range
 
 export default ReferralAnalyticsClient;

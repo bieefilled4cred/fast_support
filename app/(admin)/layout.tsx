@@ -5,8 +5,8 @@ import { DM_Sans } from "next/font/google";
 import { CSSProperties } from "react";
 import AppSidebar from "@/components/sidebar";
 import HeaderDropdown from "@/components/header";
-// import { cookies } from "next/headers";
-// import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 // import AutoLogoutWrapper from "./AutoLogoutWrapper";
 
 const dmSans = DM_Sans({
@@ -19,12 +19,12 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  //   const cookieStore = await cookies();
-  //   const encryptedToken = cookieStore.get("fast-support-tok")?.value;
+    const cookieStore = await cookies();
+    const encryptedToken = cookieStore.get("cred-crm-ticket-tok")?.value;
 
-  //   if (!encryptedToken) {
-  //     redirect("/login");
-  //   }
+    if (!encryptedToken) {
+      redirect("/login");
+    }
 
   return (
     <main lang="en">

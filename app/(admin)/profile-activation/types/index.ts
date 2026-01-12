@@ -5,18 +5,25 @@ export interface ActivationProfile {
   email: string;
   phoneNumber: string;
   avatar: string | null;
-  status: string;
+  status: string | null;
   tier: string;
   accountNumber: string;
-  accountBalance: number;
+  balance: number;
   bvn: string;
-  dateCreated: string;
-  lastLogin: string;
+  createdDate: string;
+  coreBankId: string;
 }
 
-export interface ActivationResponse {
-  data: ActivationProfile;
+export interface ActivationProfileSearchResponse {
+  data: ActivationProfile[];
   isSuccessful: boolean;
   message: string;
   code: string;
+}
+
+export interface ToggleProfileResponse {
+  data?: unknown;
+  isSuccessful: boolean;
+  message: string;
+  code?: string;
 }

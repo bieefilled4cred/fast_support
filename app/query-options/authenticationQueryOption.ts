@@ -41,11 +41,12 @@ const login = async (formData: LoginPayload): Promise<LoginResponse> => {
   const status = profile?.status || "";
   const apps = profile?.apps || [];
 
-  if (!isNewUser && accessToken && status !== "Temporary") {
+  // Set cookies for authenticated users (including temporary status users who can access the dashboard)
+  if (accessToken ) {
     await setAuthCookie(accessToken);
     await setAuthUserCookie(profile);
   }
-
+  
   return {
     isNewUser,
     message: "User successfully logged in",

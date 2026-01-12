@@ -6,10 +6,19 @@ import { TransactionRecord } from "../types";
 interface TransactionsTableProps {
   data: TransactionRecord[];
   isLoading: boolean;
+  currentPage?: number;
+  totalPages?: number;
+  onPageChange?: (page: number) => void;
 }
 
 export function TransactionsTable(props: TransactionsTableProps) {
-  const { data, isLoading } = props;
+  const {
+    data,
+    isLoading,
+    currentPage = 1,
+    totalPages = 1,
+    onPageChange,
+  } = props;
 
   const columns: ColumnDef<TransactionRecord>[] = [
     {
@@ -140,10 +149,10 @@ export function TransactionsTable(props: TransactionsTableProps) {
       data={data}
       columns={columns}
       isLoading={isLoading}
-      showPagination={false}
-      currentPage={1}
-      totalPages={1}
-      onPageChange={() => {}}
+      showPagination={totalPages > 1}
+      currentPage={currentPage}
+      totalPages={totalPages}
+      onPageChange={onPageChange}
     />
   );
 }

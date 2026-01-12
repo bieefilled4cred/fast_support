@@ -1,71 +1,34 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search } from "lucide-react";
+import { Search, Loader2 } from "lucide-react";
 import { ProfileTable } from "./components/ProfileTable";
-import { ProfileRecord, ProfileSearchResponse } from "./types";
-
-// Mock Data
-const MOCK_PROFILE_RESPONSE: ProfileSearchResponse = {
-  data: [
-    {
-      id: "42d3cf86e8c94cc8b0ec8fb733939b13",
-      firstName: "OMOTAYO ABDULLAHI",
-      lastName: "IBRAHIM",
-      avatar: null,
-      bvnRealName: null,
-      tier: "Tier1",
-      accountNumber: "1000045768",
-      email: "omotayofolorunso046@gmail.com",
-      dob: "1991-04-30T00:00:00",
-      bvn: "22183098463",
-      bvnIsVerified: true,
-      hasProfilePicture: false,
-      hasAccountNumber: true,
-      phoneVerified: false,
-      transactionPinSet: true,
-      balance: 0,
-      profileType: "Individual",
-      productType: null,
-      phoneNumber: "2348102796273",
-      address: null,
-      coreBankId: "00000022",
-      requiresOtp: false,
-      totalLimit: 10000100,
-      accruedLimit: 2000,
-      addressDocumentSubmitted: false,
-      addressDocumentVerified: false,
-      totalReferrals: 6,
-      nin: null,
-      ninIsVerified: false,
-      bvnProfileUrl: null,
-      bvnUrlUpdated: false,
-      referredBy: "OSEZOZ",
-      gender: "M",
-      referralCode: "OSEZOZ",
-      createdDate: "2025-03-25T13:19:44.10575",
-      status: "Active",
-    },
-  ],
-  isSuccessful: true,
-  message: "Operation successful",
-  code: "0",
-};
+import { ProfileRecord } from "./types";
+import { useProfileSearchMutation } from "@/app/query-options/profileSearchQueryOption";
 
 const ProfileSearchClient = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [profiles, setProfiles] = useState<ProfileRecord[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
 
+  const profileSearchMutation = useProfileSearchMutation();
+
   const handleSearch = () => {
-    console.log("Searching for profile:", searchTerm);
-    // Simulate API call
-    if (searchTerm.trim()) {
-      setProfiles(MOCK_PROFILE_RESPONSE.data);
-      setHasSearched(true);
-    }
+    if (!searchTerm.trim()) return;
+
+    profileSearchMutation.mutate(searchTerm.trim(), {
+      onSuccess: (response) => {
+        setProfiles(response.data || []);
+        setHasSearched(true);
+      },
+      onError: (error) => {
+        console.error("Error searching profiles:", error);
+        setProfiles([]);
+        setHasSearched(true);
+      },
+    });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -92,13 +55,35 @@ const ProfileSearchClient = () => {
         </div>
         <Button
           onClick={handleSearch}
-          className="bg-[#0284B2] hover:bg-[#026a8f] text-white w-full md:w-auto"
+          disabled={!searchTerm.trim() || profileSearchMutation.isPending}
+          className="bg-[#0284B2] hover:bg-[#026a8f] text-white w-full md:w-auto disabled:opacity-50"
         >
-          <Search className="mr-2 h-4 w-4" /> Search Profile
+          {profileSearchMutation.isPending ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Searching...
+            </>
+          ) : (
+            <>
+              <Search className="mr-2 h-4 w-4" />
+              Search Profile
+            </>
+          )}
         </Button>
       </div>
 
-      {hasSearched && (
+      {/* Error Message */}
+      {profileSearchMutation.isError && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
+          <p className="font-medium">Error searching profiles</p>
+          <p className="text-sm">
+            {profileSearchMutation.error?.message ||
+              "An error occurred while searching"}
+          </p>
+        </div>
+      )}
+
+      {hasSearched && !profileSearchMutation.isError && (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="mb-4 flex items-center justify-between">
             <h3 className="text-lg font-medium">Search Results</h3>
@@ -109,7 +94,10 @@ const ProfileSearchClient = () => {
 
           {profiles.length > 0 ? (
             <div className="bg-white rounded-lg shadow-sm border border-gray-100">
-              <ProfileTable data={profiles} isLoading={false} />
+              <ProfileTable
+                data={profiles}
+                isLoading={profileSearchMutation.isPending}
+              />
             </div>
           ) : (
             <div className="bg-white p-12 rounded-lg shadow-sm border border-gray-100 text-center">

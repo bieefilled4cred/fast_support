@@ -16,25 +16,29 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 
+interface UserDetailCardProps {
+  data: EmailUpdateProfile;
+  onUpdateEmail: (newEmail: string) => Promise<boolean>;
+  isUpdating?: boolean;
+}
+
 export function UserDetailCard({
   data,
   onUpdateEmail,
-}: {
-  data: EmailUpdateProfile;
-  onUpdateEmail: (newEmail: string) => void;
-}) {
+  isUpdating = false,
+}: UserDetailCardProps) {
   const [open, setOpen] = useState(false);
   const [newEmail, setNewEmail] = useState(data.email);
-  const [isLoading, setIsLoading] = useState(false);
 
-  const handleUpdate = () => {
-    setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      onUpdateEmail(newEmail);
-      setIsLoading(false);
+  const handleUpdate = async () => {
+    const success = await onUpdateEmail(newEmail);
+    if (success) {
       setOpen(false);
-    }, 1000);
+    }
+  };
+
+  const isValidEmail = (email: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
   return (
@@ -68,7 +72,7 @@ export function UserDetailCard({
                 {data.tier}
               </span>
               <span>•</span>
-              <span>{data.status}</span>
+              <span>{data.status || "Active"}</span>
             </p>
           </div>
 
@@ -100,6 +104,7 @@ export function UserDetailCard({
                   <Label htmlFor="new-email">New Email</Label>
                   <Input
                     id="new-email"
+                    type="email"
                     value={newEmail}
                     onChange={(e) => setNewEmail(e.target.value)}
                     placeholder="Enter new email address"
@@ -107,15 +112,24 @@ export function UserDetailCard({
                 </div>
               </div>
               <DialogFooter>
-                <Button variant="outline" onClick={() => setOpen(false)}>
+                <Button
+                  variant="outline"
+                  onClick={() => setOpen(false)}
+                  disabled={isUpdating}
+                >
                   Cancel
                 </Button>
                 <Button
                   onClick={handleUpdate}
                   className="bg-[#0284B2] hover:bg-[#026a8f] text-white"
-                  disabled={isLoading || !newEmail || newEmail === data.email}
+                  disabled={
+                    isUpdating ||
+                    !newEmail ||
+                    newEmail === data.email ||
+                    !isValidEmail(newEmail)
+                  }
                 >
-                  {isLoading ? "Updating..." : "Update Email"}
+                  {isUpdating ? "Updating..." : "Update Email"}
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -138,7 +152,6 @@ export function UserDetailCard({
                 </div>
               </div>
               <div className="flex items-center gap-3 text-sm">
-                {/* Reusing existing components logic or just raw HTML for speed/consistency */}
                 <div className="p-2 bg-gray-50 rounded-lg text-gray-500">
                   <User size={16} />
                 </div>

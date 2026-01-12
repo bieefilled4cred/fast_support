@@ -6,9 +6,9 @@ import {
   CreatePermissionGroupPayload,
   PermissionGroupResponse,
   PermissionGroupWithPermissionsResponse,
-} from "@/types";
-import { PERMISSION_GROUP_API } from "@/services/permissionGroupService/permissionGroupService";
-import { api } from "@/lib/apiClient";
+} from "../types";
+import { PERMISSION_GROUP_API } from "../services/permissionGroupService/permissionGroupService";
+import { api } from "../lib/apiClient";
 
 const getPermissionGroups = () => api(PERMISSION_GROUP_API.getPermissionGroups);
 

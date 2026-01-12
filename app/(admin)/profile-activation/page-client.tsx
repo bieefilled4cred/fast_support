@@ -5,38 +5,22 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Loader2 } from "lucide-react";
 import { ProfileActivationCard } from "./components/ProfileActivationCard";
-import { ActivationProfile, ActivationResponse } from "./types";
-import { toast } from "sonner"; // Using sonner for toasts
-
-// Mock Data
-const MOCK_ACTIVATION_PROFILE: ActivationResponse = {
-  data: {
-    id: "42d3cf86e8c94cc8b0ec8fb733939b13",
-    firstName: "OMOTAYO ABDULLAHI",
-    lastName: "IBRAHIM",
-    email: "omotayofolorunso046@gmail.com",
-    phoneNumber: "2348102796273",
-    avatar: null,
-    status: "Suspended", // Default to suspended to show activation flow
-    tier: "Tier 1",
-    accountNumber: "1000045768",
-    accountBalance: 25000.0,
-    bvn: "22183098463",
-    dateCreated: "2023-11-15T10:30:00",
-    lastLogin: "2026-01-08T18:45:00",
-  },
-  isSuccessful: true,
-  message: "Operation successful",
-  code: "0",
-};
+import { ActivationProfile } from "./types";
+import {
+  useActivationProfileMutation,
+  useToggleProfileMutation,
+} from "@/app/query-options/profileActivationQueryOption";
+import { toast } from "sonner";
 
 const ProfileActivationClient = () => {
   const [profileId, setProfileId] = useState("");
   const [profileData, setProfileData] = useState<ActivationProfile | null>(
     null
   );
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const profileMutation = useActivationProfileMutation();
+  const toggleMutation = useToggleProfileMutation();
 
   const handleSearch = () => {
     setError("");
@@ -47,25 +31,68 @@ const ProfileActivationClient = () => {
       return;
     }
 
-    setIsLoading(true);
-
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      // For demo, we just return the mock user regardless of ID for now,
-      // but in a real app check ID.
-      setProfileData({ ...MOCK_ACTIVATION_PROFILE.data, id: profileId });
-    }, 1000);
+    profileMutation.mutate(profileId.trim(), {
+      onSuccess: (response) => {
+        if (
+          response.isSuccessful &&
+          response.data &&
+          response.data.length > 0
+        ) {
+          setProfileData(response.data[0]);
+        } else {
+          setError(response.message || "No profile found");
+        }
+      },
+      onError: (err) => {
+        console.error("Error fetching profile:", err);
+        setError(err.message || "Failed to fetch profile. Please try again.");
+      },
+    });
   };
 
-  const handleActivate = () => {
-    if (profileData) {
-      // Optimistic update
-      setProfileData({ ...profileData, status: "Active" });
-      toast.success("Profile Activated", {
-        description: `The profile for ${profileData.firstName} has been successfully activated.`,
-      });
+  const handleActivate = async (): Promise<boolean> => {
+    if (!profileData || !profileData.id) {
+      toast.error("Cannot toggle profile: Missing profile ID");
+      return false;
     }
+
+    return new Promise((resolve) => {
+      toggleMutation.mutate(profileData.id, {
+        onSuccess: (response) => {
+          if (response.isSuccessful) {
+            // Toggle the status
+            const newStatus =
+              profileData.status?.toLowerCase() === "active"
+                ? "Suspended"
+                : "Active";
+            setProfileData({ ...profileData, status: newStatus });
+            toast.success(
+              newStatus === "Active"
+                ? "Profile Activated!"
+                : "Profile Suspended!",
+              {
+                description: `The profile for ${
+                  profileData.firstName
+                } has been ${
+                  newStatus === "Active" ? "activated" : "suspended"
+                }.`,
+              }
+            );
+            resolve(true);
+          } else {
+            toast.error(response.message || "Failed to toggle profile status");
+            resolve(false);
+          }
+        },
+        onError: (err) => {
+          console.error("Error toggling profile:", err);
+          toast.error(
+            err.message || "Failed to toggle profile. Please try again."
+          );
+          resolve(false);
+        },
+      });
+    });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -76,15 +103,18 @@ const ProfileActivationClient = () => {
 
   return (
     <div className="mx-8 my-5 space-y-6">
-      <p className="text-gray-500">View and managed profile details.</p>
+      <p className="text-gray-500">
+        View and manage profile activation status.
+      </p>
 
       <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 max-w-2xl mx-auto">
         <div className="text-center mb-6">
           <h2 className="text-lg font-semibold text-gray-800">
-            Search Inactive Profile
+            Search Profile
           </h2>
           <p className="text-gray-500 text-sm mt-1">
-            Enter the Profile ID to find and activate the user account.
+            Enter the Profile ID to find and manage the user's activation
+            status.
           </p>
         </div>
 
@@ -104,10 +134,10 @@ const ProfileActivationClient = () => {
           </div>
           <Button
             onClick={handleSearch}
-            disabled={isLoading || !profileId}
+            disabled={profileMutation.isPending || !profileId}
             className="bg-[#0284B2] hover:bg-[#026a8f] text-white h-12 px-6"
           >
-            {isLoading ? (
+            {profileMutation.isPending ? (
               <Loader2 className="h-5 w-5 animate-spin" />
             ) : (
               "Search"
@@ -124,6 +154,7 @@ const ProfileActivationClient = () => {
           <ProfileActivationCard
             data={profileData}
             onActivate={handleActivate}
+            isUpdating={toggleMutation.isPending}
           />
         </div>
       )}

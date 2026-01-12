@@ -112,7 +112,7 @@ export default function HeaderDropdown() {
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="end"
-            className="w-96 p-0 shadow-lg border-0 rounded-lg "
+            className="w-96 p-0 shadow-lg border-0 rounded-lg z-50! bg-white"
           >
             <div className="flex items-center justify-between p-4 border-b border-gray-200">
               <span className="font-semibold text-gray-900 text-base">
@@ -193,6 +193,7 @@ export default function HeaderDropdown() {
                 <Avatar>
                   <AvatarImage
                     src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${authenticatedUser?.data.firstName}`}
+                    className="rounded-full bg-primary"
                   />
                   <AvatarFallback>
                     {authenticatedUser?.data.firstName?.[0]}
@@ -203,7 +204,7 @@ export default function HeaderDropdown() {
               {isLoadingAuthenticatedUser ? (
                 <Skeleton className="h-6 w-24 rounded" />
               ) : (
-                <span className=" text-[#3A3A3A]">
+                <span className=" text-[#3A3A3A] font-semibold">
                   {authenticatedUser?.data.firstName}{" "}
                   {authenticatedUser?.data.lastName}
                 </span>

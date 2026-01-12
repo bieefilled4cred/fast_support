@@ -38,6 +38,7 @@ export const sidebarLinks: SidebarLink[] = [
       "KYC Supervisor",
       "KYC Final Approver",
       "Field Officer",
+      "IT Administration",
     ],
   },
   {
@@ -45,14 +46,14 @@ export const sidebarLinks: SidebarLink[] = [
     url: "/referral-analytics",
     icon: CirclePile,
     group: "General",
-    roles: ["Super Admin"],
+    roles: ["Super Admin", "IT Administration"],
   },
   {
     title: "Deposit Analytics",
     url: "/deposit-analytics",
     icon: BarChart2,
     group: "General",
-    roles: ["Super Admin"],
+    roles: ["Super Admin", "IT Administration"],
   },
 
   // Operations & Support
@@ -61,35 +62,35 @@ export const sidebarLinks: SidebarLink[] = [
     url: "/transactions",
     icon: ArrowRightLeft,
     group: "Operations & Support",
-    roles: ["Super Admin"],
+    roles: ["Super Admin", "IT Administration"],
   },
   {
     title: "Account Search",
     url: "/account-search",
     icon: UserRoundSearch,
     group: "Operations & Support",
-    roles: ["Super Admin"],
+    roles: ["Super Admin", "IT Administration"],
   },
   {
     title: "Profile Search",
     url: "/profile-search",
     icon: Search,
     group: "Operations & Support",
-    roles: ["Super Admin"],
+    roles: ["Super Admin", "IT Administration"],
   },
   {
     title: "Transaction Summary",
     url: "/transaction-summary",
     icon: FileText,
     group: "Operations & Support",
-    roles: ["Super Admin"],
+    roles: ["Super Admin", "IT Administration"],
   },
   {
     title: "Lab Check",
     url: "/lab-check",
     icon: FlaskConical,
     group: "Operations & Support",
-    roles: ["Super Admin"],
+    roles: ["Super Admin", "IT Administration"],
   },
 
   // Tech Support
@@ -98,7 +99,7 @@ export const sidebarLinks: SidebarLink[] = [
     url: "/bvn-lookup",
     icon: ShieldCheck,
     group: "Tech Support",
-    roles: ["Super Admin"],
+    roles: ["Super Admin", "IT Administration"],
   },
 
   // Advanced Support
@@ -107,14 +108,14 @@ export const sidebarLinks: SidebarLink[] = [
     url: "/email-update",
     icon: Mail,
     group: "Advanced Support",
-    roles: ["Super Admin"],
+    roles: ["Super Admin", "IT Administration"],
   },
   {
     title: "Profile Activation",
     url: "/profile-activation",
     icon: UserCheck,
     group: "Advanced Support",
-    roles: ["Super Admin"],
+    roles: ["Super Admin", "IT Administration"],
   },
 
   // Advanced Ops
@@ -123,27 +124,27 @@ export const sidebarLinks: SidebarLink[] = [
     url: "/requery-vas",
     icon: RefreshCw,
     group: "Advanced Ops",
-    roles: ["Super Admin"],
+    roles: ["Super Admin", "IT Administration"],
   },
   {
     title: "Check Transaction",
     url: "/check-transaction",
     icon: FileSearch,
     group: "Advanced Ops",
-    roles: ["Super Admin"],
+    roles: ["Super Admin", "IT Administration"],
   },
   {
     title: "NIP Status",
     url: "/nip-status",
     icon: Activity,
     group: "Advanced Ops",
-    roles: ["Super Admin"],
+    roles: ["Super Admin", "IT Administration"],
   },
   {
     title: "View Statements",
     url: "/view-statements",
     icon: ScrollText,
     group: "Advanced Ops",
-    roles: ["Super Admin"],
+    roles: ["Super Admin", "IT Administration"],
   },
 ];

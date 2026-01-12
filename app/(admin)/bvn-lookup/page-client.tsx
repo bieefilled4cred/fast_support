@@ -1,35 +1,20 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Loader2 } from "lucide-react";
 import { BvnResultCard } from "./components/BvnResultCard";
-import { BvnRecord, BvnLookupResponse } from "./types";
-
-// Mock Data
-const MOCK_BVN_RESPONSE: BvnLookupResponse = {
-  data: {
-    bvn: "22386721953",
-    phone_number1: "08106396353",
-    phone_number2: null,
-    first_name: "SAMUEL",
-    last_name: "PETER",
-    middle_name: "",
-    gender: "Male",
-    date_of_birth: "1997-01-27",
-    image: "",
-  },
-  isSuccessful: true,
-  message: "Operation successful",
-  code: "0",
-};
+import { BvnRecord } from "./types";
+import { useBvnLookupMutation } from "@/app/query-options/bvnLookupQueryOption";
 
 const BvnLookupClient = () => {
   const [bvn, setBvn] = useState("");
   const [result, setResult] = useState<BvnRecord | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [hasSearched, setHasSearched] = useState(false);
+
+  const bvnLookupMutation = useBvnLookupMutation();
 
   const handleSearch = () => {
     setError("");
@@ -45,19 +30,21 @@ const BvnLookupClient = () => {
       return;
     }
 
-    setIsLoading(true);
-
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      // For demo purposes, we accept the mock BVN or just return the mock data for any valid 11-digit input
-      //   if (bvn === MOCK_BVN_RESPONSE.data.bvn) {
-      setResult({ ...MOCK_BVN_RESPONSE.data, bvn: bvn });
-      //   } else {
-      //      // Optional: simulate not found if you wanted strictly matching
-      //      // setResult(null);
-      //   }
-    }, 1500);
+    bvnLookupMutation.mutate(bvn.trim(), {
+      onSuccess: (response) => {
+        if (response.isSuccessful && response.data) {
+          setResult(response.data);
+        } else {
+          setError(response.message || "BVN not found");
+        }
+        setHasSearched(true);
+      },
+      onError: (err) => {
+        console.error("Error looking up BVN:", err);
+        setError(err.message || "Failed to lookup BVN. Please try again.");
+        setHasSearched(true);
+      },
+    });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -92,10 +79,10 @@ const BvnLookupClient = () => {
           />
           <Button
             onClick={handleSearch}
-            disabled={isLoading || bvn.length !== 11}
-            className="bg-[#0284B2] hover:bg-[#026a8f] text-white h-12 px-6"
+            disabled={bvnLookupMutation.isPending || bvn.length !== 11}
+            className="bg-[#0284B2] hover:bg-[#026a8f] text-white h-12 px-6 disabled:opacity-50"
           >
-            {isLoading ? (
+            {bvnLookupMutation.isPending ? (
               <Loader2 className="h-5 w-5 animate-spin" />
             ) : (
               <Search className="h-5 w-5" />
@@ -106,8 +93,18 @@ const BvnLookupClient = () => {
       </div>
 
       {result && (
-        <div className="mt-8">
+        <div className="mt-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <BvnResultCard data={result} />
+        </div>
+      )}
+
+      {hasSearched && !result && !error && (
+        <div className="bg-gray-50 rounded-lg p-8 text-center border border-dashed border-gray-200 max-w-2xl mx-auto">
+          <Search className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+          <h3 className="text-lg font-medium text-gray-900">No BVN found</h3>
+          <p className="text-gray-500 mt-1">
+            The BVN you entered could not be found in our records.
+          </p>
         </div>
       )}
     </div>

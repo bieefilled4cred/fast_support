@@ -3,158 +3,98 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search } from "lucide-react";
+import { Search, Loader2 } from "lucide-react";
 import { TransactionsTable } from "./components/TransactionsTable";
-import { TransactionRecord, TransactionResponse } from "./types";
+import { TransactionRecord } from "./types";
+import { useAccountHistoryMutation } from "@/app/query-options/transactionsQueryOption";
 
-// Mock Data
-const MOCK_RESPONSE: TransactionResponse = {
-  data: {
-    data: [
-      {
-        id: "280c1b81-f71f-4ea6-9b50-19ee9d1c73d1",
-        financialDate: "2026-01-07",
-        transactionDate: "2026-01-07T14:35:44.25",
-        accountNumber: "1000045768",
-        accountName: "IBRAHIM OMOTAYO ABDULLAHI",
-        branch: null,
-        postedBy: null,
-        approvedBy: null,
-        postingReferenceNumber: "26010715294",
-        debit: "10000.00",
-        credit: "",
-        narration: "Airtime Purchase",
-        entryCode: "D-JRNL05",
-        instrumentNumber: "3f9ea069abbc4d8d8ba582ad9a3f7eab",
-        balance: "7731.00",
-        accessLevel: 1,
-        identifier: 464179,
-        amount: "10000.00",
-        charge: "0.00",
-        merchant: "",
-        transactionChannel: "OpenAPI",
-        transactionStatus: "Successful",
-      },
-      {
-        id: "7aa04b88-ef79-4283-9748-2cf60613aca0",
-        financialDate: "2026-01-07",
-        transactionDate: "2026-01-07T11:50:28.1066667",
-        accountNumber: "1000045768",
-        accountName: "IBRAHIM OMOTAYO ABDULLAHI",
-        branch: null,
-        postedBy: null,
-        approvedBy: null,
-        postingReferenceNumber: "26010710282",
-        debit: "5375.00",
-        credit: "",
-        narration: "FIP:IBRAHIM OMOTAYO ABDULLAHI Gift",
-        entryCode: "D-JRNL05",
-        instrumentNumber: "d9235910b87a4822be38043692e4404e",
-        balance: "17731.00",
-        accessLevel: 1,
-        identifier: 463561,
-        amount: "5375.00",
-        charge: "5375.00",
-        merchant: "",
-        transactionChannel: "OpenAPI",
-        transactionStatus: "Successful",
-      },
-      {
-        id: "a7bfc9a8-f8c6-4aad-bb33-92fe36cf509b",
-        financialDate: "2026-01-07",
-        transactionDate: "2026-01-07T11:50:25.5933333",
-        accountNumber: "1000045768",
-        accountName: "IBRAHIM OMOTAYO ABDULLAHI",
-        branch: null,
-        postedBy: null,
-        approvedBy: null,
-        postingReferenceNumber: "26010710282",
-        debit: "22300000.00",
-        credit: "",
-        narration: "FIP:IBRAHIM OMOTAYO ABDULLAHI Gift",
-        entryCode: "D-JRNL05",
-        instrumentNumber: "d9235910b87a4822be38043692e4404e",
-        balance: "23106.00",
-        accessLevel: 1,
-        identifier: 463560,
-        amount: "22300000.00",
-        charge: "5375.00",
-        merchant: "",
-        transactionChannel: "OpenAPI",
-        transactionStatus: "Successful",
-      },
-      {
-        id: "0e8f57ac-fe0a-45bd-ba51-a5d6b40750e3",
-        financialDate: "2025-12-31",
-        transactionDate: "2026-01-05T20:22:01.9366667",
-        accountNumber: "1000045768",
-        accountName: "IBRAHIM OMOTAYO ABDULLAHI",
-        branch: null,
-        postedBy: null,
-        approvedBy: null,
-        postingReferenceNumber: "E251231533762",
-        debit: "66206.00",
-        credit: "",
-        narration:
-          "Withholding Tax Deduction for 2025/12/31 - IBRAHIM OMOTAYO ABDULLAHI/1000045768",
-        entryCode: "D-WHTP",
-        instrumentNumber: "SP-1000045768-12/31/2025",
-        balance: "22323106.00",
-        accessLevel: 1,
-        identifier: 453438,
-        amount: "66206.00",
-        charge: "0.00",
-        merchant: null,
-        transactionChannel: null,
-        transactionStatus: "Successful",
-      },
-      {
-        id: "1e77d36a-d90d-479c-bb33-4716b810bf4e",
-        financialDate: "2025-12-31",
-        transactionDate: "2026-01-05T20:22:01.9366667",
-        accountNumber: "1000045768",
-        accountName: "IBRAHIM OMOTAYO ABDULLAHI",
-        branch: null,
-        postedBy: null,
-        approvedBy: null,
-        postingReferenceNumber: "E251231533762",
-        debit: "",
-        credit: "662060.00",
-        narration: "Savings Interest Received for 2025/12/31",
-        entryCode: "C-CSIP",
-        instrumentNumber: "SP-1000045768-12/31/2025",
-        balance: "22389312.00",
-        accessLevel: 1,
-        identifier: 453437,
-        amount: "662060.00",
-        charge: "0.00",
-        merchant: null,
-        transactionChannel: null,
-        transactionStatus: "Successful",
-      },
-    ],
-    recordCount: 5,
-  },
-  status: true,
-  message: "Request successful",
+const DEFAULT_PAGE_SIZE = 50;
+
+// Helper function to format date as YYYY-MM-DD
+const formatDate = (date: Date): string => {
+  return date.toISOString().split("T")[0];
 };
+
+// Get default dates (today and 7 days ago)
+const getDefaultDates = () => {
+  const today = new Date();
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(today.getDate() - 7);
+
+  return {
+    endDate: formatDate(today),
+    startDate: formatDate(sevenDaysAgo),
+  };
+};
+
+const defaultDates = getDefaultDates();
 
 const TransactionsClient = () => {
   const [accountNumber, setAccountNumber] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const [startDate, setStartDate] = useState(defaultDates.startDate);
+  const [endDate, setEndDate] = useState(defaultDates.endDate);
   const [data, setData] = useState<TransactionRecord[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalRecords, setTotalRecords] = useState(0);
+
+  const accountHistoryMutation = useAccountHistoryMutation();
 
   const handleSearch = () => {
-    // In a real application, you would make an API call here using:
-    // accountNumber, startDate, endDate
-    // console.log("Searching for:", { accountNumber, startDate, endDate });
+    if (!accountNumber || !startDate || !endDate) {
+      return;
+    }
 
-    // For now, we set the mock data
-    setData(MOCK_RESPONSE.data.data);
-    setHasSearched(true);
+    accountHistoryMutation.mutate(
+      {
+        AccountNumber: accountNumber,
+        StartDate: startDate,
+        EndDate: endDate,
+        PageNumber: 1,
+        PageSize: DEFAULT_PAGE_SIZE,
+      },
+      {
+        onSuccess: (response) => {
+          setData(response.data.data as TransactionRecord[]);
+          setTotalRecords(
+            response.data.recordCount || response.data.data.length
+          );
+          setHasSearched(true);
+          setCurrentPage(1);
+        },
+        onError: (error) => {
+          console.error("Error fetching transactions:", error);
+          setData([]);
+          setHasSearched(true);
+        },
+      }
+    );
   };
+
+  const handlePageChange = (page: number) => {
+    if (!accountNumber || !startDate || !endDate) return;
+
+    accountHistoryMutation.mutate(
+      {
+        AccountNumber: accountNumber,
+        StartDate: startDate,
+        EndDate: endDate,
+        PageNumber: page,
+        PageSize: DEFAULT_PAGE_SIZE,
+      },
+      {
+        onSuccess: (response) => {
+          setData(response.data.data as TransactionRecord[]);
+          setTotalRecords(
+            response.data.recordCount || response.data.data.length
+          );
+          setCurrentPage(page);
+        },
+      }
+    );
+  };
+
+  const totalPages = Math.ceil(totalRecords / DEFAULT_PAGE_SIZE);
 
   return (
     <div className="mx-8 my-5 space-y-6">
@@ -197,12 +137,39 @@ const TransactionsClient = () => {
         <div className="flex justify-end">
           <Button
             onClick={handleSearch}
-            className="bg-[#0284B2] hover:bg-[#026a8f] text-white"
+            disabled={
+              !accountNumber ||
+              !startDate ||
+              !endDate ||
+              accountHistoryMutation.isPending
+            }
+            className="bg-[#0284B2] hover:bg-[#026a8f] text-white disabled:opacity-50"
           >
-            <Search className="mr-2 h-4 w-4" /> Search Transactions
+            {accountHistoryMutation.isPending ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Searching...
+              </>
+            ) : (
+              <>
+                <Search className="mr-2 h-4 w-4" />
+                Search Transactions
+              </>
+            )}
           </Button>
         </div>
       </div>
+
+      {/* Error Message */}
+      {accountHistoryMutation.isError && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
+          <p className="font-medium">Error loading transactions</p>
+          <p className="text-sm">
+            {accountHistoryMutation.error?.message ||
+              "Failed to fetch transaction history"}
+          </p>
+        </div>
+      )}
 
       {/* Results Table */}
       {hasSearched && (
@@ -213,11 +180,18 @@ const TransactionsClient = () => {
             </h3>
             {accountNumber && (
               <p className="text-sm text-gray-500">
-                Showing results for account: {accountNumber}
+                Showing {data.length} of {totalRecords} results for account:{" "}
+                {accountNumber}
               </p>
             )}
           </div>
-          <TransactionsTable data={data} isLoading={false} />
+          <TransactionsTable
+            data={data}
+            isLoading={accountHistoryMutation.isPending}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
         </div>
       )}
     </div>
