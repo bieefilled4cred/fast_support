@@ -1,3 +1,5 @@
+// View Statement Types
+
 export interface BankStatementRecord {
   accountname: string;
   rcrE_TIME: string;
@@ -10,7 +12,7 @@ export interface BankStatementRecord {
   tranid: string;
   particulars: string;
   tranremarks: string;
-  dr: number;
+  dr: number | null;
   cr: number | null;
   balance: number;
   parT_TRAN_SRL_NUM: string;
@@ -18,4 +20,11 @@ export interface BankStatementRecord {
   gL_DATE: string;
 }
 
-export type BankStatementResponse = BankStatementRecord[];
+export interface ViewStatementPayload {
+  ref?: string;
+  startDate?: string;
+  endDate?: string;
+}
+
+// The API returns a direct array of records
+export type ViewStatementResponse = BankStatementRecord[];

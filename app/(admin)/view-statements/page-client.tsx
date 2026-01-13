@@ -1,92 +1,18 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Loader2 } from "lucide-react";
 import { StatementTable } from "./components/StatementTable";
-import { BankStatementRecord } from "./types";
+import { BankStatementRecord } from "@/app/types";
 import { toast } from "sonner";
-
-// Mock Data
-const MOCK_STATEMENT_data: BankStatementRecord[] = [
-  {
-    accountname: "DIGITVANT MICROFINANCE BANK LTD-SETTLEMENT ACCOUNT",
-    rcrE_TIME: "2026-01-07T23:52:11",
-    lchG_TIME: "2026-01-07T23:52:11",
-    vfD_DATE: "2026-01-07T23:52:11",
-    pstD_DATE: "2026-01-07T23:52:11",
-    entrY_DATE: "2026-01-07T23:52:11",
-    traN_DATE: "2026-01-08T00:00:00",
-    valuE_DATE: "2026-01-07T00:00:00",
-    tranid: "S40452017",
-    particulars: "WMB:000017260107235153951981879672/0126791781/FIP",
-    tranremarks: "000017260107235153951981879672",
-    dr: -500000,
-    cr: null,
-    balance: -500000,
-    parT_TRAN_SRL_NUM: "   1",
-    instrmnT_NUM: null,
-    gL_DATE: "2026-01-08T00:00:00",
-  },
-  {
-    accountname: "DIGITVANT MICROFINANCE BANK LTD-SETTLEMENT ACCOUNT",
-    rcrE_TIME: "2026-01-07T23:52:11",
-    lchG_TIME: "2026-01-07T23:52:11",
-    vfD_DATE: "2026-01-07T23:52:11",
-    pstD_DATE: "2026-01-07T23:52:11",
-    entrY_DATE: "2026-01-07T23:52:11",
-    traN_DATE: "2026-01-08T00:00:00",
-    valuE_DATE: "2026-01-07T00:00:00",
-    tranid: "S40452017",
-    particulars: "WMB:000017260107235153951981879672/0126791781/FIP",
-    tranremarks: "000017260107235153951981879672",
-    dr: -5,
-    cr: null,
-    balance: -5,
-    parT_TRAN_SRL_NUM: "   3",
-    instrmnT_NUM: null,
-    gL_DATE: "2026-01-08T00:00:00",
-  },
-  {
-    accountname: "DIGITVANT MICROFINANCE BANK LTD-SETTLEMENT ACCOUNT",
-    rcrE_TIME: "2026-01-07T23:52:11",
-    lchG_TIME: "2026-01-07T23:52:11",
-    vfD_DATE: "2026-01-07T23:52:11",
-    pstD_DATE: "2026-01-07T23:52:11",
-    entrY_DATE: "2026-01-07T23:52:11",
-    traN_DATE: "2026-01-08T00:00:00",
-    valuE_DATE: "2026-01-07T00:00:00",
-    tranid: "S40452017",
-    particulars: "WMB:000017260107235153951981879672/0126791781/FIP",
-    tranremarks: "000017260107235153951981879672",
-    dr: -0.37,
-    cr: null,
-    balance: -0.37,
-    parT_TRAN_SRL_NUM: "   5",
-    instrmnT_NUM: null,
-    gL_DATE: "2026-01-08T00:00:00",
-  },
-  {
-    accountname: "DIGITVANT MICROFINANCE BANK LTD-SETTLEMENT ACCOUNT",
-    rcrE_TIME: "2026-01-07T23:52:34",
-    lchG_TIME: "2026-01-08T20:03:00",
-    vfD_DATE: "2026-01-07T23:52:34",
-    pstD_DATE: "2026-01-07T23:52:34",
-    entrY_DATE: "2026-01-07T23:52:34",
-    traN_DATE: "2026-01-08T00:00:00",
-    valuE_DATE: "2026-01-07T00:00:00",
-    tranid: "     M557",
-    particulars: "STAMP DUTY ON: S40452017 08-JAN-26",
-    tranremarks: "STMPDTY20260107003934422077",
-    dr: -50,
-    cr: null,
-    balance: -50,
-    parT_TRAN_SRL_NUM: "   1",
-    instrmnT_NUM: null,
-    gL_DATE: "2026-01-08T00:00:00",
-  },
-];
+import { useViewStatementMutation } from "@/app/query-options/viewStatementQueryOption";
+import {
+  exportToCSV,
+  BANK_STATEMENT_HEADERS,
+  BANK_STATEMENT_EXCLUDE_FIELDS,
+} from "@/app/lib/exportUtils";
 
 const ViewStatementsClient = () => {
   const [accountReference, setAccountReference] = useState("");
@@ -95,31 +21,80 @@ const ViewStatementsClient = () => {
   const [statementData, setStatementData] = useState<
     BankStatementRecord[] | null
   >(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const viewStatementMutation = useViewStatementMutation();
 
   const handleSearch = () => {
     setError("");
     setStatementData(null);
 
-    // Optional Validation or logic if needed, but per request fields are optional.
-    // if (accountReference && (...)) { ... }
+    viewStatementMutation.mutate(
+      {
+        ref: accountReference.trim() || undefined,
+        startDate: startDate || undefined,
+        endDate: endDate || undefined,
+      },
+      {
+        onSuccess: (response) => {
+          console.log("Full API Response:", response);
 
-    setIsLoading(true);
+          const records = Array.isArray(response) ? response : [];
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      setStatementData(MOCK_STATEMENT_data);
-    }, 1500);
+          if (records.length > 0) {
+            setStatementData(records);
+            toast.success("Statement Retrieved", {
+              description: `Found ${records.length} transaction(s)`,
+            });
+          } else {
+            setStatementData([]);
+            toast.info("No Records Found", {
+              description: "No transactions found for the specified criteria",
+            });
+          }
+        },
+        onError: (error) => {
+          const errorMessage =
+            error?.message || "Failed to fetch statement. Please try again.";
+          setError(errorMessage);
+          toast.error("Error", {
+            description: errorMessage,
+          });
+        },
+      }
+    );
   };
 
   const handleExport = () => {
-    toast.success("Export Initiated", {
-      description:
-        "Your statement is being generated and will download shortly.",
-    });
-    // In a real app, trigger Excel download logic here
+    if (!statementData || statementData.length === 0) {
+      toast.error("No Data to Export", {
+        description: "Please fetch a statement first before exporting.",
+      });
+      return;
+    }
+
+    try {
+      const dateStr = new Date().toISOString().split("T")[0];
+      const filename = accountReference
+        ? `statement_${accountReference}_${dateStr}`
+        : `bank_statement_${dateStr}`;
+
+      
+      exportToCSV(statementData, {
+        filename,
+        headers: BANK_STATEMENT_HEADERS,
+        excludeFields: BANK_STATEMENT_EXCLUDE_FIELDS,
+      });
+
+      toast.success("Export Successful", {
+        description: "Your statement has been downloaded as CSV.",
+      });
+    } catch (err) {
+      console.error("Export error:", err);
+      toast.error("Export Failed", {
+        description: "There was an error exporting the statement.",
+      });
+    }
   };
 
   return (
@@ -135,7 +110,7 @@ const ViewStatementsClient = () => {
             <div className="relative">
               <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
               <Input
-                placeholder="Enter Account Number or Reference ID"
+                placeholder="Search by Account Reference e.g 1234567890"
                 value={accountReference}
                 onChange={(e) => {
                   setAccountReference(e.target.value);
@@ -171,10 +146,10 @@ const ViewStatementsClient = () => {
           <div className="lg:col-span-4 flex justify-end">
             <Button
               onClick={handleSearch}
-              disabled={isLoading}
+              disabled={viewStatementMutation.isPending}
               className="bg-[#0284B2] hover:bg-[#026a8f] text-white min-w-[150px]"
             >
-              {isLoading ? (
+              {viewStatementMutation.isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Fetching
                   Statement...

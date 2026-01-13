@@ -11,5 +11,6 @@ export const LOGIN_URL = process.env.NEXT_PUBLIC_LOGIN_URL;
 // export const CRM_DASHBOARD_URL = process.env.NEXT_PUBLIC_CRM_DASHBOARD_URL;
 
 export const VAS_API_URL = process.env.NEXT_PUBLIC_VAS_API_URL;
+export const CREDPAY_SWITCH_API_URL =process.env.NEXT_PUBLIC_CREDPAY_SWITCH_API_URL;
 
 export const DEFAULT_PAGE_SIZE = 10;

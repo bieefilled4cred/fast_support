@@ -3,39 +3,18 @@
 import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Loader2, ArrowRightLeft } from "lucide-react"; // ArrowRightLeft for transaction-ish icon
+import { Search, Loader2, ArrowRightLeft } from "lucide-react";
 import { NipStatusResultCard } from "./components/NipStatusResultCard";
 import { NipStatusResponse } from "./types";
-
-// Mock Data logic helper
-const parseMockResponse = (sessionId: string): NipStatusResponse => {
-  // Return success for specific ID or generic demo
-  if (
-    sessionId === "000017260105183947086611846855" ||
-    sessionId.toLowerCase() === "success"
-  ) {
-    return {
-      rawResponse: "00|Approved or Completed Successfully",
-      code: "00",
-      message: "Approved or Completed Successfully",
-      sessionId: sessionId,
-    };
-  }
-
-  // Return failed/not found for others
-  return {
-    rawResponse: "25|Unable to locate record",
-    code: "25",
-    message: "Unable to locate record",
-    sessionId: sessionId,
-  };
-};
+import { useNipStatusMutation } from "@/app/query-options/nipStatusQueryOption";
+import { toast } from "sonner";
 
 const NipStatusClient = () => {
   const [sessionId, setSessionId] = useState("");
   const [result, setResult] = useState<NipStatusResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const nipStatusMutation = useNipStatusMutation();
 
   const handleSearch = () => {
     setError("");
@@ -46,14 +25,32 @@ const NipStatusClient = () => {
       return;
     }
 
-    setIsLoading(true);
+    nipStatusMutation.mutate(sessionId.trim(), {
+      onSuccess: (response) => {
+        setResult(response);
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      const data = parseMockResponse(sessionId);
-      setResult(data);
-    }, 1200);
+        if (response.code === "00") {
+          toast.success("Transaction Found", {
+            description:
+              response.message || "Transaction verified successfully.",
+          });
+        } else {
+          toast.warning("NIP Status", {
+            description: `Code: ${response.code} - ${response.message}`,
+          });
+        }
+      },
+      onError: (err) => {
+        console.error("Error checking NIP status:", err);
+        setError(
+          err.message || "Failed to check NIP status. Please try again."
+        );
+        toast.error("Query Failed", {
+          description:
+            err.message || "An error occurred while checking the NIP status.",
+        });
+      },
+    });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -65,7 +62,7 @@ const NipStatusClient = () => {
   return (
     <div className="mx-8 my-5 space-y-6">
       <p className="text-gray-500">
-        View and managed NIBBS NIP transaction details.
+        View and manage NIBSS NIP transaction details.
       </p>
 
       <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 max-w-2xl mx-auto">
@@ -84,7 +81,7 @@ const NipStatusClient = () => {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
             <Input
-              placeholder="Session ID (e.g. 000017...)"
+              placeholder="Session ID (e.g. 0708e7fb...)"
               value={sessionId}
               onChange={(e) => {
                 setSessionId(e.target.value);
@@ -96,10 +93,10 @@ const NipStatusClient = () => {
           </div>
           <Button
             onClick={handleSearch}
-            disabled={isLoading || !sessionId}
+            disabled={nipStatusMutation.isPending || !sessionId}
             className="bg-[#0284B2] hover:bg-[#026a8f] text-white h-12 px-6"
           >
-            {isLoading ? (
+            {nipStatusMutation.isPending ? (
               <Loader2 className="h-5 w-5 animate-spin" />
             ) : (
               "Query Status"
@@ -109,12 +106,6 @@ const NipStatusClient = () => {
         {error && (
           <p className="text-red-500 text-sm mt-3 text-center">{error}</p>
         )}
-
-        <div className="mt-4 text-center">
-          <p className="text-xs text-gray-400">
-            Try "success" or "000017260105183947086611846855"
-          </p>
-        </div>
       </div>
 
       {result && (

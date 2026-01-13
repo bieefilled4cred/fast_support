@@ -4,7 +4,8 @@ import { CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
 export function NipStatusResultCard({ data }: { data: NipStatusResponse }) {
   const isSuccess = data.code === "00";
   const isPending =
-    data.code === "01" || data.message.toLowerCase().includes("pending");
+    data.code === "01" ||
+    (data.message?.toLowerCase().includes("pending") ?? false);
 
   let Icon = XCircle;
   let bgColor = "bg-red-50";
@@ -51,7 +52,7 @@ export function NipStatusResultCard({ data }: { data: NipStatusResponse }) {
           </p>
           <p className={`text-sm ${textColor}`}>
             <span className="font-semibold opacity-75 mr-2">Message:</span>
-            {data.message}
+            {data.message || "No message available"}
           </p>
         </div>
       </div>

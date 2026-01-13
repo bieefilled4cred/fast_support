@@ -1,16 +1,22 @@
-
 import { BASE_URL } from "../constants/api";
 
 export async function api(
   path: string,
-  options: RequestInit & { baseUrl?: string; returnBlob?: boolean; allow400?: boolean } = {}
+  options: RequestInit & {
+    baseUrl?: string;
+    returnBlob?: boolean;
+    returnText?: boolean;
+    allow400?: boolean;
+  } = {}
 ) {
   const baseUrl = options.baseUrl || BASE_URL;
 
   if (!baseUrl) {
-    throw new Error("BASE_URL is not defined. Please set NEXT_PUBLIC_API_URL environment variable.");
+    throw new Error(
+      "BASE_URL is not defined. Please set NEXT_PUBLIC_API_URL environment variable."
+    );
   }
-  const { returnBlob } = options;
+  const { returnBlob, returnText } = options;
   const { allow400 } = options;
 
   const fetchOptions: RequestInit = {
@@ -42,6 +48,13 @@ export async function api(
       throw new Error(`HTTP error! status: ${res.status}`);
     }
     return res.blob();
+  }
+
+  if (returnText) {
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
+    return res.text();
   }
 
   let data = null;

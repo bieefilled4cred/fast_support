@@ -1,6 +1,6 @@
 "use client";
 
-import { BankStatementRecord } from "../types";
+import { BankStatementRecord } from "@/app/types";
 import {
   Table,
   TableBody,

@@ -9,6 +9,7 @@ import {
   DepositRecord,
 } from "./components/DepositTable";
 import { useMonthlyDepositQuery } from "@/app/query-options/depositAnalyticsQueryOption";
+import { exportToCSV } from "@/app/lib/exportUtils";
 
 const DEFAULT_PAGE_SIZE = 20;
 
@@ -33,40 +34,29 @@ const DepositAnalyticsClient = () => {
     : undefined;
 
   const handleDownload = () => {
-    if (!data?.data) return;
+    if (!data?.data || data.data.length === 0) return;
 
-    // Generate CSV content
-    const headers = [
-      "Full Name",
-      "Account Number",
-      "Phone Number",
-      "Total Deposit",
-      "Referral Code",
-      "Date",
-    ];
-    const csvRows = [headers.join(",")];
+    const dateStr = new Date().toISOString().split("T")[0];
 
-    data.data.forEach((row) => {
-      csvRows.push(
-        [
-          `"${row.fullName}"`,
-          `"${row.accountNumber || ""}"`,
-          `"${row.phoneNumber}"`,
-          row.totalDepositAmount,
-          `"${row.referralCode}"`,
-          `"${row.dateMonth}"`,
-        ].join(",")
-      );
+    exportToCSV(data.data, {
+      filename: `deposit_analytics_${dateStr}`,
+      headers: {
+        fullName: "Full Name",
+        accountNumber: "Account Number",
+        phoneNumber: "Phone Number",
+        totalDepositAmount: "Total Deposit",
+        referralCode: "Referral Code",
+        dateMonth: "Date",
+      },
+      includeFields: [
+        "fullName",
+        "accountNumber",
+        "phoneNumber",
+        "totalDepositAmount",
+        "referralCode",
+        "dateMonth",
+      ],
     });
-
-    const csvContent = "data:text/csv;charset=utf-8," + csvRows.join("\n");
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "deposit_analytics.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
   };
 
   const handlePageChange = (page: number) => {

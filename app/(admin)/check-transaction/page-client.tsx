@@ -6,18 +6,15 @@ import { Button } from "@/components/ui/button";
 import { Search, Loader2 } from "lucide-react";
 import { TransactionStatusCard } from "./components/TransactionStatusCard";
 import { CheckTransactionResponse } from "./types";
-
-// Mock Response based on user example
-const MOCK_RESPONSE: CheckTransactionResponse = {
-  code: "00",
-  description: "000017260105183947086611846855",
-};
+import { useCheckTransactionMutation } from "@/app/query-options/checkTransactionQueryOption";
+import { toast } from "sonner";
 
 const CheckTransactionClient = () => {
   const [reference, setReference] = useState("");
   const [result, setResult] = useState<CheckTransactionResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const checkTransactionMutation = useCheckTransactionMutation();
 
   const handleSearch = () => {
     setError("");
@@ -28,14 +25,32 @@ const CheckTransactionClient = () => {
       return;
     }
 
-    setIsLoading(true);
+    checkTransactionMutation.mutate(reference.trim(), {
+      onSuccess: (response) => {
+        console.log("Transaction status response:", response);
+        setResult(response);
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      // For demo, return the mock successful response
-      setResult(MOCK_RESPONSE);
-    }, 1000);
+        if (response.code === "00") {
+          toast.success("Transaction Found", {
+            description: "Transaction verified successfully.",
+          });
+        } else {
+          toast.warning("Transaction Status", {
+            description: `Code: ${response.code} - ${response.description}`,
+          });
+        }
+      },
+      onError: (err) => {
+        console.error("Error checking transaction:", err);
+        setError(
+          err.message || "Failed to check transaction. Please try again."
+        );
+        toast.error("Check Failed", {
+          description:
+            err.message || "An error occurred while checking the transaction.",
+        });
+      },
+    });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -47,7 +62,7 @@ const CheckTransactionClient = () => {
   return (
     <div className="mx-8 my-5 space-y-6">
       <p className="text-gray-500">
-        View and managed check transactions details.
+        View and manage check transactions details.
       </p>
 
       <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 max-w-2xl mx-auto">
@@ -77,10 +92,14 @@ const CheckTransactionClient = () => {
           </div>
           <Button
             onClick={handleSearch}
-            disabled={isLoading || !reference}
+            disabled={checkTransactionMutation.isPending || !reference}
             className="bg-[#0284B2] hover:bg-[#026a8f] text-white h-12 px-6"
           >
-            {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Check"}
+            {checkTransactionMutation.isPending ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              "Check"
+            )}
           </Button>
         </div>
         {error && (

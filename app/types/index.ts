@@ -14,6 +14,9 @@ export * from "./bvnLookup";
 export * from "./emailUpdate";
 export * from "./profileActivation";
 export * from "./vasRequery";
+export * from "./checkTransaction";
+export * from "./nipStatus";
+export * from "./viewStatement";
 
 export interface ResetPasswordPayload {
   username: string;

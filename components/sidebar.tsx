@@ -123,12 +123,6 @@ export default function AppSidebar() {
                                 ? "text-[#FFFFFF]"
                                 : "text-[#04B2F1]"
                             }`}
-                            fill={`${
-                              pathname === item.url ||
-                              pathname.includes(item.url)
-                                ? "#FFFFFF"
-                                : "#04B2F1"
-                            }`}
                           />
                           <span className="text-[13px]">{item.title}</span>
                         </Link>
