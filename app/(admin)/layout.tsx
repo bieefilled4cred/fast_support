@@ -7,7 +7,7 @@ import AppSidebar from "@/components/sidebar";
 import HeaderDropdown from "@/components/header";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-// import AutoLogoutWrapper from "./AutoLogoutWrapper";
+import AutoLogoutWrapper from "./AutoLogoutWrapper";
 
 const dmSans = DM_Sans({
   variable: "--font-dm",
@@ -19,16 +19,16 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-    const cookieStore = await cookies();
-    const encryptedToken = cookieStore.get("cred-crm-ticket-tok")?.value;
+  const cookieStore = await cookies();
+  const encryptedToken = cookieStore.get("cred-crm-ticket-tok")?.value;
 
-    if (!encryptedToken) {
-      redirect("/login");
-    }
+  if (!encryptedToken) {
+    redirect("/login");
+  }
 
   return (
     <main lang="en">
-      {/* <AutoLogoutWrapper /> */}
+      <AutoLogoutWrapper />
       <div
         className={`min-h-screen grid grid-cols-1 ${dmSans.variable} antialiased vsc-initialized`}
       >
