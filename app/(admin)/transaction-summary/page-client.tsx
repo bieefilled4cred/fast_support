@@ -217,11 +217,8 @@ const TransactionSummaryClient = () => {
       {/* Error Message */}
       {transactionSummaryMutation.isError && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
-          <p className="font-medium">Error fetching transactions</p>
-          <p className="text-sm">
-            {transactionSummaryMutation.error?.message ||
-              "An error occurred while searching"}
-          </p>
+          <p className="font-medium">Unable to load transaction summary</p>
+          <p className="text-sm">Please try again.</p>
         </div>
       )}
 

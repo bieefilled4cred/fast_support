@@ -117,7 +117,7 @@ const ReferralAnalyticsClient = () => {
         }
       },
       onError: (error) => {
-        toast.error(error.message || "Failed to fetch referral analytics");
+        toast.error("Unable to load referral analytics. Please try again.");
       },
     });
   };
@@ -146,7 +146,7 @@ const ReferralAnalyticsClient = () => {
           setProfilesLoading(false);
         },
         onError: (error) => {
-          toast.error(error.message || "Failed to fetch profiles");
+          toast.error("Unable to load profiles. Please try again.");
           setProfilesLoading(false);
           setProfiles([]);
         },

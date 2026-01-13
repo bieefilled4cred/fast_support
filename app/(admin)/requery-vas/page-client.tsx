@@ -44,12 +44,10 @@ const RequeryVasClient = () => {
       },
       onError: (err) => {
         console.error("Error querying transaction:", err);
-        setError(
-          err.message || "Failed to query transaction. Please try again."
-        );
+        const errorMessage = "Unable to load transaction. Please try again.";
+        setError(errorMessage);
         toast.error("Query Failed", {
-          description:
-            err.message || "An error occurred while querying the transaction.",
+          description: errorMessage,
         });
       },
     });

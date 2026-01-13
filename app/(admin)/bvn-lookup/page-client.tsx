@@ -41,7 +41,7 @@ const BvnLookupClient = () => {
       },
       onError: (err) => {
         console.error("Error looking up BVN:", err);
-        setError(err.message || "Failed to lookup BVN. Please try again.");
+        setError("Unable to load BVN details. Please try again.");
         setHasSearched(true);
       },
     });

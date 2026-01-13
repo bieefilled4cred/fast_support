@@ -42,12 +42,11 @@ const CheckTransactionClient = () => {
       },
       onError: (err) => {
         console.error("Error checking transaction:", err);
-        setError(
-          err.message || "Failed to check transaction. Please try again."
-        );
+        const errorMessage =
+          "Unable to load transaction status. Please try again.";
+        setError(errorMessage);
         toast.error("Check Failed", {
-          description:
-            err.message || "An error occurred while checking the transaction.",
+          description: errorMessage,
         });
       },
     });

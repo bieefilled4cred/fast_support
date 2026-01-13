@@ -54,8 +54,7 @@ const ViewStatementsClient = () => {
           }
         },
         onError: (error) => {
-          const errorMessage =
-            error?.message || "Failed to fetch statement. Please try again.";
+          const errorMessage = "Unable to load statement. Please try again.";
           setError(errorMessage);
           toast.error("Error", {
             description: errorMessage,
@@ -79,7 +78,6 @@ const ViewStatementsClient = () => {
         ? `statement_${accountReference}_${dateStr}`
         : `bank_statement_${dateStr}`;
 
-      
       exportToCSV(statementData, {
         filename,
         headers: BANK_STATEMENT_HEADERS,

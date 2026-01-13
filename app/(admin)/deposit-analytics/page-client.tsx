@@ -81,21 +81,22 @@ const DepositAnalyticsClient = () => {
 
       {isError && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
-          <p className="font-medium">Error loading data</p>
-          <p className="text-sm">
-            {error?.message || "Failed to fetch deposit analytics"}
-          </p>
+          <p className="font-medium">Unable to load deposit analytics</p>
+          <p className="text-sm">Please try again.</p>
         </div>
       )}
 
-      <div className="">
-        <DepositTable
-          data={tableData}
-          isLoading={isLoading}
-          currentPage={currentPage}
-          onPageChange={handlePageChange}
-        />
-      </div>
+      {/* Hide table when there's an error */}
+      {!isError && (
+        <div className="">
+          <DepositTable
+            data={tableData}
+            isLoading={isLoading}
+            currentPage={currentPage}
+            onPageChange={handlePageChange}
+          />
+        </div>
+      )}
     </div>
   );
 };

@@ -163,16 +163,13 @@ const TransactionsClient = () => {
       {/* Error Message */}
       {accountHistoryMutation.isError && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
-          <p className="font-medium">Error loading transactions</p>
-          <p className="text-sm">
-            {accountHistoryMutation.error?.message ||
-              "Failed to fetch transaction history"}
-          </p>
+          <p className="font-medium">Unable to load transactions</p>
+          <p className="text-sm">Please try again.</p>
         </div>
       )}
 
-      {/* Results Table */}
-      {hasSearched && (
+      
+      {hasSearched && !accountHistoryMutation.isError && (
         <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
           <div className="mb-4">
             <h3 className="text-lg font-medium">

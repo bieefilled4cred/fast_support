@@ -42,12 +42,10 @@ const NipStatusClient = () => {
       },
       onError: (err) => {
         console.error("Error checking NIP status:", err);
-        setError(
-          err.message || "Failed to check NIP status. Please try again."
-        );
+        const errorMessage = "Unable to load NIP status. Please try again.";
+        setError(errorMessage);
         toast.error("Query Failed", {
-          description:
-            err.message || "An error occurred while checking the NIP status.",
+          description: errorMessage,
         });
       },
     });

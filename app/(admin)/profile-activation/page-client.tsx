@@ -45,7 +45,7 @@ const ProfileActivationClient = () => {
       },
       onError: (err) => {
         console.error("Error fetching profile:", err);
-        setError(err.message || "Failed to fetch profile. Please try again.");
+        setError("Unable to load profile. Please try again.");
       },
     });
   };
@@ -80,15 +80,13 @@ const ProfileActivationClient = () => {
             );
             resolve(true);
           } else {
-            toast.error(response.message || "Failed to toggle profile status");
+            toast.error("Unable to update profile status. Please try again.");
             resolve(false);
           }
         },
         onError: (err) => {
           console.error("Error toggling profile:", err);
-          toast.error(
-            err.message || "Failed to toggle profile. Please try again."
-          );
+          toast.error("Unable to update profile status. Please try again.");
           resolve(false);
         },
       });

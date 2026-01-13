@@ -43,7 +43,7 @@ const EmailUpdateClient = () => {
       },
       onError: (err) => {
         console.error("Error fetching profile:", err);
-        setError(err.message || "Failed to fetch profile. Please try again.");
+        setError("Unable to load profile. Please try again.");
       },
     });
   };
@@ -67,15 +67,13 @@ const EmailUpdateClient = () => {
               toast.success("Email updated successfully!");
               resolve(true);
             } else {
-              toast.error(response.message || "Failed to update email");
+              toast.error("Unable to update email. Please try again.");
               resolve(false);
             }
           },
           onError: (err) => {
             console.error("Error updating email:", err);
-            toast.error(
-              err.message || "Failed to update email. Please try again."
-            );
+            toast.error("Unable to update email. Please try again.");
             resolve(false);
           },
         }
