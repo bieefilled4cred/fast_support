@@ -1,5 +1,4 @@
 import { useMutation } from "@tanstack/react-query";
-import { api } from "../lib/apiClient";
 import {
   PROFILE_SEARCH_API,
   PROFILE_SEARCH_BASE_URL,
@@ -11,7 +10,6 @@ import {
 import {
   APIError,
   EmailUpdateSearchResponse,
-  UpdateEmailPayload,
   UpdateEmailResponse,
 } from "../types";
 
@@ -20,16 +18,31 @@ const getProfile = async (
   searchTerm: string
 ): Promise<EmailUpdateSearchResponse> => {
   const encodedSearchTerm = encodeURIComponent(searchTerm);
-  const endpoint = `${PROFILE_SEARCH_API.getProfiles}/${encodedSearchTerm}`;
+  const endpoint = `${PROFILE_SEARCH_BASE_URL}${PROFILE_SEARCH_API.getProfiles}/${encodedSearchTerm}`;
 
-  const response = await api(endpoint, {
+  const response = await fetch(endpoint, {
     method: "GET",
-    baseUrl: PROFILE_SEARCH_BASE_URL,
+    headers: {
+      "Content-Type": "application/json",
+    },
   });
 
-  console.log("Profile response for email update:", response);
+  const data = await response.json().catch(() => null);
 
-  return response as EmailUpdateSearchResponse;
+  if (!response.ok) {
+    if (response.status === 404) {
+      // Handle 404 specially if needed, but usually it means not found
+      // If the backend returns a structured error for 404, we use it.
+      // If not, we construct one.
+    }
+
+    throw Object.assign(new Error(data?.message || "Failed to fetch profile"), {
+      status: response.status,
+      response: data,
+    });
+  }
+
+  return data as EmailUpdateSearchResponse;
 };
 
 // Update customer email using coreBankId
@@ -40,17 +53,26 @@ const updateCustomerEmail = async ({
   coreBankId: string;
   email: string;
 }): Promise<UpdateEmailResponse> => {
-  const endpoint = `${EMAIL_UPDATE_API.updateCustomerInfo}/${coreBankId}`;
+  const endpoint = `${EMAIL_UPDATE_BASE_URL}${EMAIL_UPDATE_API.updateCustomerInfo}/${coreBankId}`;
 
-  const response = await api(endpoint, {
+  const response = await fetch(endpoint, {
     method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify({ email }),
-    baseUrl: EMAIL_UPDATE_BASE_URL,
   });
 
-  console.log("Email update response:", response);
+  const data = await response.json().catch(() => null);
 
-  return response as UpdateEmailResponse;
+  if (!response.ok) {
+    throw Object.assign(new Error(data?.message || "Failed to update email"), {
+      status: response.status,
+      response: data,
+    });
+  }
+
+  return data as UpdateEmailResponse;
 };
 
 // Mutation hook for fetching profile (search-triggered)

@@ -133,7 +133,7 @@ const EmailUpdateClient = () => {
       </div>
 
       {userData && (
-        <div className="max-w-2xl mx-auto mt-8">
+        <div className="max-w-5xl mx-auto mt-8">
           <UserDetailCard
             data={userData}
             onUpdateEmail={handleUpdateEmail}
