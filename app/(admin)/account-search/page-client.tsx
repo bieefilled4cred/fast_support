@@ -20,7 +20,15 @@ const AccountSearchClient = () => {
 
     accountDetailMutation.mutate(accountNumber.trim(), {
       onSuccess: (response) => {
-        setData(response.data);
+        // @ts-ignore
+        let accountData = response.data?.data || response.data;
+
+        // Handle empty array case - treat as null (not found)
+        if (Array.isArray(accountData) && accountData.length === 0) {
+          accountData = null;
+        }
+
+        setData(accountData);
         setHasSearched(true);
       },
       onError: (error) => {
@@ -95,8 +103,18 @@ const AccountSearchClient = () => {
           {data ? (
             <AccountDetails data={data} />
           ) : (
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 text-center text-gray-500">
-              No account found.
+            <div className="bg-white p-12 rounded-lg shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center">
+              <div className="bg-gray-100 p-4 rounded-full mb-4">
+                <Search className="h-8 w-8 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                No account found
+              </h3>
+              <p className="text-gray-500 max-w-sm">
+                We couldn't find any account details matching distinct account
+                number "{accountNumber}". Please verify the number and try
+                again.
+              </p>
             </div>
           )}
         </div>

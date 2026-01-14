@@ -18,7 +18,6 @@ const checkTransactionStatus = async (
     baseUrl: CHECK_TRANSACTION_BASE_URL,
   });
 
-  console.log("Check transaction response:", response);
 
   return response as CheckTransactionResponse;
 };

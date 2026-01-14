@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { api } from "../lib/apiClient";
+import { getSSOToken } from "../lib/ssoToken";
 import {
   ACCOUNT_SEARCH_API,
   ACCOUNT_SEARCH_BASE_URL,
@@ -10,16 +10,39 @@ import { APIError, AccountDetailResponse } from "../types";
 const getAccountDetail = async (
   accountNumber: string
 ): Promise<AccountDetailResponse> => {
-  const endpoint = `${ACCOUNT_SEARCH_API.getAccountDetail}/${accountNumber}`;
+  // Get SSO token for authentication
+  const token = await getSSOToken();
 
-  const response = await api(endpoint, {
+  const endpoint = `${ACCOUNT_SEARCH_BASE_URL}${ACCOUNT_SEARCH_API.getAccountDetail}/${accountNumber}`;
+
+  const response = await fetch(endpoint, {
     method: "GET",
-    baseUrl: ACCOUNT_SEARCH_BASE_URL,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
   });
 
-  console.log("Account detail response:", response);
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => null);
 
-  return response as AccountDetailResponse;
+    // Handle case where backend returns non-200 status (e.g., 404) but body indicates success
+    if (errorData?.status === true) {
+      return errorData as AccountDetailResponse;
+    }
+
+    throw Object.assign(
+      new Error(errorData?.message || "Failed to fetch account details"),
+      {
+        status: response.status,
+        response: errorData,
+      }
+    );
+  }
+
+  const data = await response.json();
+
+  return data as AccountDetailResponse;
 };
 
 // Mutation hook for fetching account details (search-triggered)

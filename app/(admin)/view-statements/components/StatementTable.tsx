@@ -58,27 +58,27 @@ export function StatementTable({ data, onExport }: StatementTableProps) {
       <div className="rounded-md border bg-white overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <Table>
-            <TableHeader className="bg-gray-50">
+            <TableHeader className="bg-[#E3F2FD]">
               <TableRow>
-                <TableHead className="font-bold whitespace-nowrap">
+                <TableHead className="font-medium text-[#0284B2] whitespace-nowrap py-[10px]">
                   Reference
                 </TableHead>
-                <TableHead className="font-bold whitespace-nowrap">
+                {/* <TableHead className="font-medium text-[#0284B2] whitespace-nowrap py-[10px]">
                   Particulars
-                </TableHead>
-                <TableHead className="font-bold text-right whitespace-nowrap text-red-600">
+                </TableHead> */}
+                <TableHead className="font-medium text-right whitespace-nowrap py-[10px] text-red-600">
                   Debit (₦)
                 </TableHead>
-                <TableHead className="font-bold text-right whitespace-nowrap text-green-600">
+                <TableHead className="font-medium text-right whitespace-nowrap py-[10px] text-green-600">
                   Credit (₦)
                 </TableHead>
-                <TableHead className="font-bold text-right whitespace-nowrap">
+                <TableHead className="font-medium text-right whitespace-nowrap py-[10px] text-[#0284B2]">
                   Balance (₦)
                 </TableHead>
-                <TableHead className="font-bold whitespace-nowrap">
+                <TableHead className="font-medium text-[#0284B2] whitespace-nowrap py-[10px]">
                   GL Date
                 </TableHead>
-                <TableHead className="font-bold whitespace-nowrap">
+                <TableHead className="font-medium text-[#0284B2] whitespace-nowrap py-[10px]">
                   Value Date
                 </TableHead>
               </TableRow>
@@ -89,12 +89,12 @@ export function StatementTable({ data, onExport }: StatementTableProps) {
                   <TableCell className="font-mono text-xs">
                     {row.tranremarks || row.tranid}
                   </TableCell>
-                  <TableCell
+                  {/* <TableCell
                     className="max-w-xs truncate text-xs"
                     title={row.particulars}
                   >
                     {row.particulars}
-                  </TableCell>
+                  </TableCell> */}
                   <TableCell className="text-right text-red-600 font-medium whitespace-nowrap">
                     {row.dr !== 0 && row.dr !== null
                       ? formatCurrency(Math.abs(row.dr))

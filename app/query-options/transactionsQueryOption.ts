@@ -1,5 +1,4 @@
 import { useMutation } from "@tanstack/react-query";
-import { api } from "../lib/apiClient";
 import {
   TRANSACTIONS_API,
   TRANSACTIONS_BASE_URL,
@@ -9,39 +8,61 @@ import {
   AccountHistoryPayload,
   AccountHistoryResponse,
 } from "../types";
+import { getSSOToken } from "../lib/ssoToken";
 
 // Default pagination values
 const DEFAULT_PAGE_SIZE = 50;
 
-// Fetch account history/transactions
+// Fetch account history/transactions using SSO token
 const getAccountHistory = async (
   payload: AccountHistoryPayload
 ): Promise<AccountHistoryResponse> => {
+  // Get SSO token for authentication
+  const token = await getSSOToken();
+
   const queryParams = new URLSearchParams();
 
-  // Required params
   queryParams.append("StartDate", payload.StartDate);
   queryParams.append("EndDate", payload.EndDate);
-  queryParams.append("AccountNumber", payload.AccountNumber);
-
-  // Optional pagination params
   queryParams.append("PageNumber", (payload.PageNumber || 1).toString());
   queryParams.append(
     "PageSize",
     (payload.PageSize || DEFAULT_PAGE_SIZE).toString()
   );
+  queryParams.append("AccountNumber", payload.AccountNumber);
 
   const queryString = queryParams.toString();
-  const endpoint = `${TRANSACTIONS_API.getAccountHistory}?${queryString}`;
+  const endpoint = `${TRANSACTIONS_BASE_URL}${TRANSACTIONS_API.getAccountHistory}?${queryString}`;
 
-  const response = await api(endpoint, {
+  const response = await fetch(endpoint, {
     method: "GET",
-    baseUrl: TRANSACTIONS_BASE_URL,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
   });
 
-  console.log("Account history response:", response);
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => null);
 
-  return response as AccountHistoryResponse;
+    // Handle case where backend returns non-200 status (e.g., 404) but body indicates success
+    // This often happens when no records are found
+    if (errorData?.status === true) {
+      return errorData as AccountHistoryResponse;
+    }
+
+    throw Object.assign(
+      new Error(errorData?.message || "Failed to fetch account history"),
+      {
+        status: response.status,
+        response: errorData,
+      }
+    );
+  }
+
+  const data = await response.json();
+
+  return data as AccountHistoryResponse;
 };
 
 // Mutation hook for fetching account history (search-triggered)

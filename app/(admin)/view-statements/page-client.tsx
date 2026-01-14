@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Loader2 } from "lucide-react";
@@ -13,6 +13,10 @@ import {
   BANK_STATEMENT_HEADERS,
   BANK_STATEMENT_EXCLUDE_FIELDS,
 } from "@/app/lib/exportUtils";
+import { useDebounce } from "@/hooks/use-debounce";
+
+const MIN_SEARCH_LENGTH = 5; // Minimum characters before triggering search
+const DEBOUNCE_DELAY = 500; // 500ms delay
 
 const ViewStatementsClient = () => {
   const [accountReference, setAccountReference] = useState("");
@@ -23,7 +27,26 @@ const ViewStatementsClient = () => {
   >(null);
   const [error, setError] = useState("");
 
+  // Debounce the account reference input
+  const debouncedAccountReference = useDebounce(
+    accountReference,
+    DEBOUNCE_DELAY
+  );
+
   const viewStatementMutation = useViewStatementMutation();
+
+  // Auto-search when debounced value changes
+  useEffect(() => {
+    // Only search if we have enough characters
+    if (debouncedAccountReference.trim().length >= MIN_SEARCH_LENGTH) {
+      handleSearch();
+    } else if (debouncedAccountReference.trim().length === 0) {
+      // Clear results when input is cleared
+      setStatementData(null);
+      setError("");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedAccountReference, startDate, endDate]);
 
   const handleSearch = () => {
     setError("");
@@ -31,7 +54,7 @@ const ViewStatementsClient = () => {
 
     viewStatementMutation.mutate(
       {
-        ref: accountReference.trim() || undefined,
+        ref: debouncedAccountReference.trim() || undefined,
         startDate: startDate || undefined,
         endDate: endDate || undefined,
       },
@@ -95,6 +118,12 @@ const ViewStatementsClient = () => {
     }
   };
 
+  // Check if search is pending (either waiting for debounce or API call)
+  const isSearching =
+    viewStatementMutation.isPending ||
+    (accountReference.trim().length >= MIN_SEARCH_LENGTH &&
+      accountReference !== debouncedAccountReference);
+
   return (
     <div className="mx-8 my-5 space-y-6">
       <p className="text-gray-500">View and managed account statements.</p>
@@ -106,7 +135,11 @@ const ViewStatementsClient = () => {
               Account Reference
             </label>
             <div className="relative">
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+              {isSearching ? (
+                <Loader2 className="absolute left-3 top-2.5 h-4 w-4 text-[#0284B2] animate-spin" />
+              ) : (
+                <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+              )}
               <Input
                 placeholder="Search by Account Reference e.g 1234567890"
                 value={accountReference}
@@ -117,6 +150,14 @@ const ViewStatementsClient = () => {
                 className="pl-9"
               />
             </div>
+            {/* <p className="text-xs text-gray-400">
+              {accountReference.length > 0 &&
+              accountReference.length < MIN_SEARCH_LENGTH
+                ? `Type ${
+                    MIN_SEARCH_LENGTH - accountReference.length
+                  } more character(s) to search`
+                : "Search starts automatically after typing"}
+            </p> */}
           </div>
 
           <div className="space-y-1">
@@ -144,7 +185,10 @@ const ViewStatementsClient = () => {
           <div className="lg:col-span-4 flex justify-end">
             <Button
               onClick={handleSearch}
-              disabled={viewStatementMutation.isPending}
+              disabled={
+                viewStatementMutation.isPending ||
+                accountReference.trim().length < MIN_SEARCH_LENGTH
+              }
               className="bg-[#0284B2] hover:bg-[#026a8f] text-white min-w-[150px]"
             >
               {viewStatementMutation.isPending ? (

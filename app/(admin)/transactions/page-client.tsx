@@ -168,7 +168,6 @@ const TransactionsClient = () => {
         </div>
       )}
 
-      
       {hasSearched && !accountHistoryMutation.isError && (
         <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
           <div className="mb-4">
@@ -182,13 +181,24 @@ const TransactionsClient = () => {
               </p>
             )}
           </div>
-          <TransactionsTable
-            data={data}
-            isLoading={accountHistoryMutation.isPending}
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-          />
+          {data.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-gray-500">
+              <Search className="h-12 w-12 mb-4 text-gray-300" />
+              <p className="text-lg font-medium">No transactions found</p>
+              <p className="text-sm">
+                No transactions found for account {accountNumber} between{" "}
+                {startDate} and {endDate}.
+              </p>
+            </div>
+          ) : (
+            <TransactionsTable
+              data={data}
+              isLoading={accountHistoryMutation.isPending}
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          )}
         </div>
       )}
     </div>
