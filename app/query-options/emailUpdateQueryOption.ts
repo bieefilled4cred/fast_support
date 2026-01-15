@@ -30,6 +30,13 @@ const getProfile = async (
   const data = await response.json().catch(() => null);
 
   if (!response.ok) {
+    if (response.status === 401) {
+      throw Object.assign(new Error("Unauthorized"), {
+        status: 401,
+        response: data,
+      });
+    }
+
     if (response.status === 404) {
       // Handle 404 specially if needed, but usually it means not found
       // If the backend returns a structured error for 404, we use it.
@@ -66,6 +73,13 @@ const updateCustomerEmail = async ({
   const data = await response.json().catch(() => null);
 
   if (!response.ok) {
+    if (response.status === 401) {
+      throw Object.assign(new Error("Unauthorized"), {
+        status: 401,
+        response: data,
+      });
+    }
+
     throw Object.assign(new Error(data?.message || "Failed to update email"), {
       status: response.status,
       response: data,

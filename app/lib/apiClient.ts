@@ -70,6 +70,13 @@ export async function api(
   }
 
   if (!res.ok || data?.isSuccessful === false) {
+    if (res.status === 401) {
+      throw Object.assign(new Error("Unauthorized"), {
+        status: 401,
+        response: data,
+      });
+    }
+
     throw Object.assign(new Error(data?.message || "API request failed"), {
       status: res.status,
       response: data,

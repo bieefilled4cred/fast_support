@@ -45,6 +45,13 @@ const getAccountHistory = async (
   if (!response.ok) {
     const errorData = await response.json().catch(() => null);
 
+    if (response.status === 401) {
+      throw Object.assign(new Error("Unauthorized"), {
+        status: 401,
+        response: errorData,
+      });
+    }
+
     // Handle case where backend returns non-200 status (e.g., 404) but body indicates success
     // This often happens when no records are found
     if (errorData?.status === true) {

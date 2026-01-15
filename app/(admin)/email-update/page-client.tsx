@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Loader2 } from "lucide-react";
+import { Search, Loader2, UserMinus } from "lucide-react";
 import { UserDetailCard } from "./components/UserDetailCard";
 import { EmailUpdateProfile } from "./types";
 import {
@@ -36,7 +36,12 @@ const EmailUpdateClient = () => {
           response.data &&
           response.data.length > 0
         ) {
-          setUserData(response?.data[0]);
+          setUserData(response.data[0]);
+        } else if (
+          response.isSuccessful &&
+          (!response.data || response.data.length === 0)
+        ) {
+          setError("No account found for this user.");
         } else {
           setError(response.message || "No profile found");
         }
@@ -128,7 +133,15 @@ const EmailUpdateClient = () => {
           </Button>
         </div>
         {error && (
-          <p className="text-red-500 text-sm mt-3 text-center">{error}</p>
+          <div className="bg-red-50 border border-red-100 rounded-lg p-6 mt-6 flex flex-col items-center justify-center text-center animate-in fade-in slide-in-from-top-2">
+            <div className="bg-red-100 p-3 rounded-full mb-3">
+              <UserMinus className="text-red-500 w-6 h-6" />
+            </div>
+            <h3 className="text-red-800 font-semibold mb-1">
+              Invalid Account Number
+            </h3>
+            <p className="text-red-600 text-sm max-w-xs">{error}</p>
+          </div>
         )}
       </div>
 

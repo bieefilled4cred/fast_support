@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   Users,
   CreditCard,
@@ -11,15 +12,19 @@ import {
   TriangleAlert,
   Mail,
   PieChart,
+  LayoutGrid,
+  LineChart,
 } from "lucide-react";
 import { StatsCard } from "./components/StatsCard";
 import { QuickActionCard } from "./components/QuickActionCard";
 import { RecentActivityTable } from "./components/RecentActivityTable";
+import { GrowthMetricsTab } from "./components/GrowthMetricsTab";
 import { getAuthenticatedUserQueryOptions } from "@/app/query-options/usersQueryOption";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const DashboardClient = () => {
+  const [activeTab, setActiveTab] = useState("quick-actions");
   const { data: authenticatedUser, isLoading: isLoadingAuthenticatedUser } =
     useQuery(getAuthenticatedUserQueryOptions());
   const fullname = `${authenticatedUser?.data.firstName} ${authenticatedUser?.data.lastName}`;
@@ -71,92 +76,123 @@ const DashboardClient = () => {
           color="bg-[#0282b1]"
         />
       </div>
-      <h2 className="text-lg font-bold text-gray-800 mb-4 font-(family-name:--font-inter)">
-        Quick Actions
-      </h2>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Main Content Area - Quick Actions */}
-        <div className="lg:col-span-2">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <QuickActionCard
-              title="Search Accounts"
-              description="Find user accounts by ID or number"
-              href="/account-search"
-              icon={Search}
-              colorClass="bg-blue-50 text-blue-600"
-            />
-            <QuickActionCard
-              title="Check Transaction"
-              description="Verify transaction status"
-              href="/check-transaction"
-              icon={FileText}
-              colorClass="bg-green-50 text-green-600"
-            />
-            <QuickActionCard
-              title="BVN Lookup"
-              description="Verify BVN details"
-              href="/bvn-lookup"
-              icon={ShieldCheck}
-              colorClass="bg-purple-50 text-purple-600"
-            />
-            <QuickActionCard
-              title="Profile Activation"
-              description="Activate suspended profiles"
-              href="/profile-activation"
-              icon={UserCheck}
-              colorClass="bg-orange-50 text-orange-600"
-            />
-            <QuickActionCard
-              title="Email Update"
-              description="Modify user email addresses"
-              href="/email-update"
-              icon={Mail}
-              colorClass="bg-pink-50 text-pink-600"
-            />
-            <QuickActionCard
-              title="View Statements"
-              description="Generate account statements"
-              href="/view-statements"
-              icon={FileText}
-              colorClass="bg-cyan-50 text-cyan-600"
-            />
-          </div>
+
+      {/* Tabs */}
+      <div>
+        <div className="flex items-center space-x-1 bg-gray-100/80 p-1.5 rounded-xl w-fit mb-6 border border-gray-200">
+          <button
+            onClick={() => setActiveTab("quick-actions")}
+            className={`text-xs flex items-center px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
+              activeTab === "quick-actions"
+                ? "bg-white text-gray-900 shadow-sm"
+                : "text-gray-500 hover:text-gray-700 hover:bg-white/50"
+            }`}
+          >
+            <LayoutGrid className="w-4 h-4 mr-2" />
+            Quick Actions
+          </button>
+          <button
+            onClick={() => setActiveTab("growth-metrics")}
+            className={`flex items-center px-4 py-2 rounded-lg text-xs font-medium transition-all duration-300 ${
+              activeTab === "growth-metrics"
+                ? "bg-white text-gray-900 shadow-sm"
+                : "text-gray-500 hover:text-gray-700 hover:bg-white/50"
+            }`}
+          >
+            <LineChart className="w-4 h-4 mr-2" />
+            Growth Metrics
+          </button>
         </div>
 
-        {/* Sidebar - fills remaining height */}
-        <div className="flex flex-col gap-4">
-          <div className="bg-[#0284B2] rounded-xl p-6 text-white shadow-md relative overflow-hidden flex-1">
-            <div className="relative z-10">
-              <h3 className="font-bold text-lg mb-2 font-(family-name:--font-inter)">
-                Referral Analytics
-              </h3>
-              <p className="text-blue-100 text-sm mb-6">
-                Track user growth and referral performance.
-              </p>
-              <a
-                href="/referral-analytics"
-                className="inline-flex items-center bg-white text-[#0284B2] px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-50 transition-colors"
-              >
-                <PieChart className="w-4 h-4 mr-2" /> View Analytics
-              </a>
+        {/* Tab Content */}
+        {activeTab === "quick-actions" ? (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
+            {/* Main Content Area - Quick Actions */}
+            <div className="lg:col-span-2">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <QuickActionCard
+                  title="Search Accounts"
+                  description="Find user accounts by ID or number"
+                  href="/account-search"
+                  icon={Search}
+                  colorClass="bg-blue-50 text-blue-600"
+                />
+                <QuickActionCard
+                  title="Check Transaction"
+                  description="Verify transaction status"
+                  href="/check-transaction"
+                  icon={FileText}
+                  colorClass="bg-green-50 text-green-600"
+                />
+                <QuickActionCard
+                  title="BVN Lookup"
+                  description="Verify BVN details"
+                  href="/bvn-lookup"
+                  icon={ShieldCheck}
+                  colorClass="bg-purple-50 text-purple-600"
+                />
+                <QuickActionCard
+                  title="Profile Activation"
+                  description="Activate suspended profiles"
+                  href="/profile-activation"
+                  icon={UserCheck}
+                  colorClass="bg-orange-50 text-orange-600"
+                />
+                <QuickActionCard
+                  title="Email Update"
+                  description="Modify user email addresses"
+                  href="/email-update"
+                  icon={Mail}
+                  colorClass="bg-pink-50 text-pink-600"
+                />
+                <QuickActionCard
+                  title="View Statements"
+                  description="Generate account statements"
+                  href="/view-statements"
+                  icon={FileText}
+                  colorClass="bg-cyan-50 text-cyan-600"
+                />
+              </div>
             </div>
-            <div className="absolute right-[-20px] bottom-[-20px] opacity-10">
-              <PieChart size={120} />
-            </div>
-          </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex-1">
-            <h3 className="font-bold text-gray-800 mb-4 font-(family-name:--font-inter)">
-              System Status
-            </h3>
-            <div className="space-y-4">
-              <StatusItem label="NIP Service" status="Operational" />
-              <StatusItem label="BVN Service" status="Operational" />
-              <StatusItem label="VAS Gateway" status="Degraded" isWarning />
-              <StatusItem label="Email Service" status="Operational" />
+            {/* Sidebar - fills remaining height */}
+            <div className="flex flex-col gap-4">
+              <div className="bg-[#0284B2] rounded-xl p-6 text-white shadow-md relative overflow-hidden flex-1">
+                <div className="relative z-10">
+                  <h3 className="font-bold text-lg mb-2 font-(family-name:--font-inter)">
+                    Referral Analytics
+                  </h3>
+                  <p className="text-blue-100 text-sm mb-6">
+                    Track user growth and referral performance.
+                  </p>
+                  <a
+                    href="/referral-analytics"
+                    className="inline-flex items-center bg-white text-[#0284B2] px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-50 transition-colors"
+                  >
+                    <PieChart className="w-4 h-4 mr-2" /> View Analytics
+                  </a>
+                </div>
+                <div className="absolute right-[-20px] bottom-[-20px] opacity-10">
+                  <PieChart size={120} />
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex-1">
+                <h3 className="font-bold text-gray-800 mb-4 font-(family-name:--font-inter)">
+                  System Status
+                </h3>
+                <div className="space-y-4">
+                  <StatusItem label="NIP Service" status="Operational" />
+                  <StatusItem label="BVN Service" status="Operational" />
+                  <StatusItem label="VAS Gateway" status="Degraded" isWarning />
+                  <StatusItem label="Email Service" status="Operational" />
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        ) : (
+          <GrowthMetricsTab />
+        )}
       </div>
 
       {/* Recent Activity */}
